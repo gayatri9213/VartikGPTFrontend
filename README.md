@@ -1,0 +1,2 @@
+# VartikGPTFrontend
+GenAI-VartikGPT frontend
