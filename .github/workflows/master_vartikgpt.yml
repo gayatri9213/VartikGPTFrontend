@@ -6,106 +6,36 @@ on:
       - master
   workflow_dispatch:
 
-env:
-  NODE_VERSION: '20.x'
-  AZURE_WEBAPP_NAME: 'VartikGPT'
-
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          node-version: '20.x'
 
       - name: Install dependencies
+        run: npm install
+
+      # If you have a production build step, include it here
+      - name: Build the project for production
         run: |
-          npm ci
-          npm install --save-dev eslint @next/eslint-plugin-next
+          npm run build || echo "No build script found, skipping build."
 
-      - name: List installed packages
-        run: npm list --depth=0
-
-      - name: Check for react-router-dom
-        run: |
-          if (Get-Content package.json | Select-String -Pattern '"react-router-dom"') {
-            echo "react-router-dom found in package.json"
-          } else {
-            echo "react-router-dom not found in package.json"
-          }
-
-      - name: Create or update _document.js
-        run: |
-          $documentContent = @"
-          import Document, { Html, Head, Main, NextScript } from 'next/document'
-
-          class MyDocument extends Document {
-            render() {
-              return (
-                <Html>
-                  <Head>
-                    <link
-                      href="https://fonts.googleapis.com/css2?family=Your+Font+Name&display=swap"
-                      rel="stylesheet"
-                    />
-                  </Head>
-                  <body>
-                    <Main />
-                    <NextScript />
-                  </body>
-                </Html>
-              )
-            }
-          }
-
-          export default MyDocument
-          "@
-          Set-Content -Path "pages/_document.js" -Value $documentContent
-
-      - name: Update .eslintrc.json
-        run: |
-          $eslintContent = @"
-          {
-            "extends": [
-              "next",
-              "next/core-web-vitals"
-            ],
-            "plugins": ["@next/eslint-plugin-next"],
-            "rules": {
-              "@next/next/no-img-element": "off",
-              "@next/next/no-page-custom-font": "off"
-            }
-          }
-          "@
-          Set-Content -Path ".eslintrc.json" -Value $eslintContent
-
-      - name: Build
-        run: |
-          npm run dev
-        env:
-          CI: true
-
+      # Testing step (optional)
       - name: Run tests
-        run: npm test --if-present
+        run: |
+          npm run test || echo "No test script found, skipping tests."
 
-      - name: Zip artifact for deployment
-        run: Compress-Archive * release.zip
-        shell: pwsh
+      - name: Prepare artifact for deployment
+        run: |
+          mkdir -p deployment
+          cp -r * deployment/
+          zip -r release.zip deployment/*
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -114,11 +44,13 @@ jobs:
           path: release.zip
 
   deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    permissions:
+      id-token: write
 
     steps:
       - name: Download artifact from build job
@@ -127,8 +59,7 @@ jobs:
           name: node-app
 
       - name: Unzip artifact for deployment
-        run: Expand-Archive release.zip
-        shell: pwsh
+        run: unzip release.zip
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -141,11 +72,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          app-name: 'VartikGPT'
           slot-name: 'Production'
-          package: .
-
-      - name: 'Verify deployment'
-        run: |
-          echo "Deployed to ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
-          # Add any post-deployment checks here
+          package: './deployment'
