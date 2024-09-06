@@ -37,18 +37,12 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: |
-          npm run build
+        run: npm run build
         env:
-          CI: true  # This will treat warnings as errors, helping to catch potential issues
+          CI: true
 
       - name: Run tests
         run: npm test --if-present
-
-      - name: Debug build output
-        run: |
-          echo "Listing build output directory:"
-          dir .next /s
 
       - name: Zip artifact for deployment
         run: Compress-Archive * release.zip
