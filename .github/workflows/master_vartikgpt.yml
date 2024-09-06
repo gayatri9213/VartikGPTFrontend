@@ -34,8 +34,7 @@ jobs:
       - name: Prepare artifact for deployment
         run: |
           mkdir -p deployment
-          cp -r * deployment/
-          zip -r release.zip deployment/*
+          cp -r !\(deployment\)/* deployment/ # This excludes the deployment directory
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
