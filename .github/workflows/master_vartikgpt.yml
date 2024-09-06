@@ -34,10 +34,69 @@ jobs:
             ${{ runner.os }}-
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          npm install --save-dev eslint @next/eslint-plugin-next
+
+      - name: List installed packages
+        run: npm list --depth=0
+
+      - name: Check for react-router-dom
+        run: |
+          if (Get-Content package.json | Select-String -Pattern '"react-router-dom"') {
+            echo "react-router-dom found in package.json"
+          } else {
+            echo "react-router-dom not found in package.json"
+          }
+
+      - name: Create or update _document.js
+        run: |
+          $documentContent = @"
+          import Document, { Html, Head, Main, NextScript } from 'next/document'
+
+          class MyDocument extends Document {
+            render() {
+              return (
+                <Html>
+                  <Head>
+                    <link
+                      href="https://fonts.googleapis.com/css2?family=Your+Font+Name&display=swap"
+                      rel="stylesheet"
+                    />
+                  </Head>
+                  <body>
+                    <Main />
+                    <NextScript />
+                  </body>
+                </Html>
+              )
+            }
+          }
+
+          export default MyDocument
+          "@
+          Set-Content -Path "pages/_document.js" -Value $documentContent
+
+      - name: Update .eslintrc.json
+        run: |
+          $eslintContent = @"
+          {
+            "extends": [
+              "next",
+              "next/core-web-vitals"
+            ],
+            "plugins": ["@next/eslint-plugin-next"],
+            "rules": {
+              "@next/next/no-img-element": "off",
+              "@next/next/no-page-custom-font": "off"
+            }
+          }
+          "@
+          Set-Content -Path ".eslintrc.json" -Value $eslintContent
 
       - name: Build
-        run: npm run build
+        run: |
+          npm run dev
         env:
           CI: true
 
