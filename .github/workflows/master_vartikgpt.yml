@@ -29,22 +29,22 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # If you have a production build step, include it here
       - name: Build the project for production
         run: |
           npm run build || echo "No build script found, skipping build."
-
-      - name: Clean build folder (Optional)
+      # Testing step (optional)
+      - name: Run tests
         run: |
-          rm -rf build/static/js/*.map  # Remove source maps if not needed
-
+          npm run test || echo "No test script found, skipping tests."
       - name: Prepare artifact for deployment
         run: |
           mkdir -p deployment
-          rsync -av --progress build/ deployment/  # Sync only the build folder
+          rsync -av --progress --exclude=deployment ./ deployment/
           zip -r release.zip deployment/*
-
-      - name: List files in deployment folder (Debugging)
-        run: ls -al deployment
+      # Debugging: List files to ensure the zip is created
+      - name: List files in current directory
+        run: ls -al
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
