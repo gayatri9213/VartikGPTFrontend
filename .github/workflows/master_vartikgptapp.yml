@@ -1,4 +1,4 @@
-name: Build and deploy Node.js app to Azure Web App - VartikGPT
+name: Build and deploy Node.js app to Azure Web App - vartikgptapp
 
 on:
   push:
@@ -82,6 +82,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'VartikGPT'
+          app-name: 'vartikgptapp'
           slot-name: 'Production'
           package: './deployment'
