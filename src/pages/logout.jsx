@@ -1,10 +1,10 @@
 import { useMsal } from "@azure/msal-react";
 import { useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 
 export default function LogoutView() {
   const { instance } = useMsal();
-  const navigate = useNavigate();
+  const navigate = useRouter();
 
   const handleClick = useCallback(() => {
     instance.logoutPopup().then(() => {
