@@ -17,8 +17,8 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_BASE_URL = "https://localhost:7046/api";
-const VectorDB_API_BASE_URL = "http://192.168.30.93:8011/v1/index";
+const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api";
+const VectorDB_API_BASE_URL = "http://dataingestion.eastus.azurecontainer.io:8011/v1/index";
 
 export default function VectorDB() {
   const [isCreateIndexChecked, setIsCreateIndexChecked] = useState(false);

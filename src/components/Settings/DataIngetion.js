@@ -26,9 +26,9 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_BASE_URL = "https://localhost:7046/api";
-const INJECT_API_BASE_URL = "http://192.168.30.93:8011/v1/dataingestion/ingest";
-const VECTOR_STORE_API_BASE_URL = "http://192.168.30.93:8011/v1/index";
+const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api";
+const INJECT_API_BASE_URL = "http://dataingestion.eastus.azurecontainer.io:8011/v1/dataingestion/ingest";
+const VECTOR_STORE_API_BASE_URL = "http://dataingestion.eastus.azurecontainer.io:8011/v1/index";
 
 export default function App() {
   const [tabIndex, setTabIndex] = useState(0);
@@ -480,7 +480,7 @@ function StatusTable() {
         // Fetch department names in parallel
         const deptRequests = deptIds.map((id) =>
           axios
-            .get(`https://localhost:7046/api/Department/${id}`, {
+            .get(`${API_BASE_URL}/Department/${id}`, {
               headers: {
                 accept: "text/plain",
               },

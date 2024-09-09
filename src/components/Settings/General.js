@@ -21,7 +21,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_BASE_URL = "https://localhost:7046/api";
+const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api";
 
 const initialFormData = {
   userId: 0,

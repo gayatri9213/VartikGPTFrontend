@@ -43,7 +43,7 @@ export default function LoginForm() {
     vectorIndex: "",
   });
 
-  const API_BASE_URL = "https://localhost:7046/api";
+  const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api";
 
   const getUser = async (uniqueAzureId) => {
     try {
