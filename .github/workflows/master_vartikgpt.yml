@@ -40,10 +40,10 @@ jobs:
           npm run test || echo "No test script found, skipping tests."
       
       - name: Prepare artifact for deployment
-        run: |
-          mkdir -p deployment
-          rsync -av --progress --exclude=deployment ./ deployment/
-          zip -r release.zip deployment/*
+        run: | 
+            mkdir -p deployment
+            rsync -av --progress --exclude=node_modules --exclude=*.log --exclude=deployment ./ deployment/
+            zip -r release.zip deployment/*
 
       # Debugging: List files to ensure the zip is created
       - name: List files in current directory
