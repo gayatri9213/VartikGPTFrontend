@@ -51,7 +51,7 @@ jobs:
          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_8699B11DC34E40DFB1A48DA220EE6570 }}
          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_17D4F7ADA8934D15BB633D3AB810B24A }}
          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5B594A7C7A7243EDA8F1B74000369C71 }}
-         auth-type: 'servicePrincipal' # Added auth-type for clarity
+         auth-type: 'SERVICE_PRINCIPAL' # Added auth-type for clarity
         
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
