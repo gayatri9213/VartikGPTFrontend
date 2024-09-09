@@ -33,19 +33,17 @@ jobs:
       - name: Build the project for production
         run: |
           npm run build || echo "No build script found, skipping build."
-      
-      # Testing step (optional)
+
       - name: Run tests
         run: |
           npm run test || echo "No test script found, skipping tests."
-      
-      - name: Prepare artifact for deployment
-        run: | 
-            mkdir -p deployment
-            rsync -av --progress --exclude=node_modules --exclude=*.log --exclude=deployment ./ deployment/
-            zip -r release.zip deployment/*
 
-      # Debugging: List files to ensure the zip is created
+      - name: Prepare artifact for deployment
+        run: |
+          mkdir -p deployment
+          rsync -av --progress --exclude=node_modules --exclude=*.log --exclude=deployment ./ deployment/
+          zip -r release.zip deployment/*
+
       - name: List files in current directory
         run: ls -al
 
@@ -87,4 +85,3 @@ jobs:
           app-name: 'VartikGPT'
           slot-name: 'Production'
           package: './deployment'
-
