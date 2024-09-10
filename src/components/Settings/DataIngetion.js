@@ -26,9 +26,9 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api";
-const INJECT_API_BASE_URL = "http://dataingestion.eastus.azurecontainer.io:8011/v1/dataingestion/ingest";
-const VECTOR_STORE_API_BASE_URL = "http://dataingestion.eastus.azurecontainer.io:8011/v1/index";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;;
+const INJECT_API_BASE_URL = process.env.REACT_APP_INJECT_API_BASE_URL;
+const VECTOR_STORE_API_BASE_URL = process.env.REACT_APP_VECTORDB_API_BASE_URL;
 
 export default function App() {
   const [tabIndex, setTabIndex] = useState(0);

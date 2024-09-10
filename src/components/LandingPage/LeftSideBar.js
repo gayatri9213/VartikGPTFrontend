@@ -9,7 +9,7 @@ import { useLogout } from "../Logout/helper";
 import Image from "next/image";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 
-const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;;
 
 export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
   const logout = useLogout();

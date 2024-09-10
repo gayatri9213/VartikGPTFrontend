@@ -3,8 +3,8 @@ import { Box, TextField, Typography } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import axios from "axios";
 
-const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api";
-const API_CHAT_URL = "http://vartikgpt.eastus.azurecontainer.io:8012/v1/vartikgpt/chat";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_CHAT_URL = process.env.REACT_APP_API_CHAT_URL;
 const userIcon = "/images/user (1).png";
 const assistantIcon = "/images/bot (1).png";
 
