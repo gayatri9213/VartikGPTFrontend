@@ -4,7 +4,7 @@ export const msalConfig = {
     authority:
       "https://login.microsoftonline.com/da41fc73-c60d-4537-9111-22975cdbf183",
      //  redirectUri: "http://localhost:3000",
-    redirectUri: "https://vartikgpt.azurewebsites.net",
+    redirectUri: "https://vartikgptapp.azurewebsites.net/",
   },
   cache: {
     cacheLocation: "localStorage",
