@@ -17,11 +17,12 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: npm install and build
+      - name: npm install, build, and test
         run: |
           npm install
-          npm run build
-          npm run export  # Add this line for static export
+          npm run build --if-present
+          npm run test --if-present
+          npm run export --if-present
 
       - name: Compress files
         run: tar -czf node-app.tar.gz -C out .  # Change 'out' to '.next' if not using static export
