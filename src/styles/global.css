@@ -14,7 +14,7 @@
 html,
 body {
   position: relative;
-  font-family: "Poppins", sans-serif;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
 }
 
 .MuiTabs-vertical .MuiTab-textColorPrimary {
@@ -22,7 +22,7 @@ body {
 }
 
 .MuiMenuItem-root .MuiSelect-outlined {
-  font-family: "Poppins", sans-serif !important;
+  font-family:  "Roboto", "Helvetica", "Arial", sans-serif !important;
   font-size: 14px;
 }
 
