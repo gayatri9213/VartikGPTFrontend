@@ -26,12 +26,16 @@ jobs:
           npm install
           npm run build --if-present
           npm run test --if-present
-      
+
+      # Compress the files before uploading to reduce the number of files handled
+      - name: Compress files
+        run: tar -czf node-app.tar.gz -C . .
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: node-app.tar.gz
 
   deploy:
     runs-on: ubuntu-latest
@@ -48,6 +52,10 @@ jobs:
         with:
           name: node-app
       
+      # Extract the compressed artifact
+      - name: Extract files
+        run: tar -xzf node-app.tar.gz
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -62,4 +70,3 @@ jobs:
           app-name: 'vartikgptapp'
           slot-name: 'Production'
           package: .
-          
