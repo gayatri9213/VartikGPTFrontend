@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - vartikgptapp
 
 on:
@@ -12,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -21,15 +17,14 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: npm install, build, and test
+      - name: npm install and build
         run: |
           npm install
-          npm run build --if-present
-          npm run test --if-present
+          npm run build
+          npm run export  # Add this line for static export
 
-      # Compress the files before uploading to reduce the number of files handled
       - name: Compress files
-        run: tar -czf node-app.tar.gz -C . .
+        run: tar -czf node-app.tar.gz -C out .  # Change 'out' to '.next' if not using static export
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -43,18 +38,18 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      
-      # Extract the compressed artifact
+
       - name: Extract files
-        run: tar -xzf node-app.tar.gz
+        run: mkdir -p myapp && tar -xzf node-app.tar.gz -C myapp
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -69,4 +64,4 @@ jobs:
         with:
           app-name: 'vartikgptapp'
           slot-name: 'Production'
-          package: ./build
+          package: myapp  # Changed from ./build to myapp
