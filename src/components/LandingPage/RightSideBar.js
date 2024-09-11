@@ -20,8 +20,11 @@ import "react-toastify/dist/ReactToastify.css";
 const selectSx = { fontSize: "14px", height: "2rem" };
 const menuItemSx = { fontSize: "14px", fontWeight: "300" };
 
- const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api";
-const VECTOR_STORE_API_BASE_URL = "http://dataingestion.eastus.azurecontainer.io:8011/v1/index"
+const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api";
+const VECTOR_STORE_API_BASE_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://dataingestion.eastus.azurecontainer.io:8011/v1/index"
+    : process.env.REACT_APP_VECTORDB_API_BASE_URL;
 
 export default function RightSideBar({
   openRightSideBar,
@@ -96,10 +99,19 @@ export default function RightSideBar({
     const value = event.target.value;
     setSelectedVectorStore(value);
     const indexes = await fetchIndexes(value);
-    console.log("indexes", indexes);
+    // Update vectorIndexes and check selectedVectorIndex
+    if (indexes.includes(selectedVectorIndex)) {
+      setVectorIndexes(indexes);
+      setSelectedVectorIndex(selectedVectorIndex);
+    } else {
+      setVectorIndexes(indexes);
+      setSelectedVectorIndex(selectedVectorIndex); // or set to a default value
+    }
+
     saveFormDataToLocalStorage({
       ...JSON.parse(localStorage.getItem("formData") || "{}"),
       vectorStore: value,
+      vectorIndex: selectedVectorIndex, // Ensure this is included
     });
 
     const departmentId = JSON.parse(
@@ -126,23 +138,6 @@ export default function RightSideBar({
           toast.error(`No data found for vector store ${value}`);
           setVectorIndexes([]);
         }
-        //   if(vectorStoreData){
-        //      // Check if the vectorIndex in vectorStoreData is in the indexes array
-        //   const isIndexMatched = indexes.includes(vectorStoreData.vectorIndex);
-        //   console.log("isIndexMatched",isIndexMatched)
-        //   if (isIndexMatched) {
-        //     console.log("Matched index found:", vectorStoreData.vectorIndex);
-        //     // Display the vectorStoreData values as needed
-        //     setVectorIndexes([vectorStoreData.vectorIndex]);
-        //   } else {
-        //     console.log("No matching index found.");
-        //     setVectorIndexes([]);
-        //   }
-
-        // } else {
-        //     toast.error(`No data found for vector store ${value}`);
-        //     setVectorIndexes([]);
-        //   }
       } catch (error) {
         toast.error(`Error fetching vector store data for ${value}`);
         console.error(`Error fetching vector store data for ${value}:`, error);
@@ -211,10 +206,10 @@ export default function RightSideBar({
           Accept: "text/plain",
         },
       });
-    
+
       return { data: response.data, error: null };
     } catch (error) {
-      console.log(`${API_BASE_URL}`)
+      console.log(`${API_BASE_URL}`);
       toast.error("Error fetching LLM Ref data");
       console.error("Error fetching LLM Ref data:", error);
       return { data: null, error: error.message };
@@ -222,7 +217,6 @@ export default function RightSideBar({
   };
 
   useEffect(() => {
-    
     const fetchLLMData = async () => {
       const { data, error } = await getLLMRefData();
       if (data) {
@@ -252,7 +246,13 @@ export default function RightSideBar({
     );
     setMaxTokens(parseInt(savedFormData.maxTokens) || parseInt(0));
     setSelectedVectorStore(savedFormData.vectorStore || "");
-    setSelectedVectorIndex(savedFormData.vectorIndex || "");
+    // Ensure vectorIndexes are loaded before setting selectedVectorIndex
+    if (savedFormData.vectorIndex) {
+      // Set vectorIndex only if it's valid
+      setSelectedVectorIndex(savedFormData.vectorIndex);
+    } else {
+      setSelectedVectorIndex(""); // or a default value if needed
+    }
   }, []);
 
   const handleVendorChange = (event) => {
@@ -289,9 +289,6 @@ export default function RightSideBar({
     localStorage.setItem("formData", JSON.stringify(formData));
 
     try {
-      // const userResponse = await axios.get(
-      //   `${API_BASE_URL}/User/unique/${formData.UniqueAzureId}`
-      // );
       const userId = formData.userId;
       if (!userId) {
         console.error("User ID not found in local storage.");
@@ -571,15 +568,28 @@ export default function RightSideBar({
                 value={selectedVectorIndex}
                 onChange={handleVectorIndexChange}
                 IconComponent={KeyboardArrowDownOutlinedIcon}
-                // disabled={vectorIndexDisabled}
               >
+                {selectedVectorIndex && (
+                  <MenuItem value={selectedVectorIndex} sx={menuItemSx}>
+                    {selectedVectorIndex}{" "}
+                    {!vectorIndexes.includes(selectedVectorIndex) && ""}
+                  </MenuItem>
+                )}
                 {vectorIndexes &&
                   Array.isArray(vectorIndexes) &&
-                  vectorIndexes.map((index) => (
-                    <MenuItem key={index} value={index} sx={menuItemSx}>
-                      {index}
-                    </MenuItem>
-                  ))}
+                  vectorIndexes
+                    .filter((index) => index !== selectedVectorIndex)
+                    .map((index) => (
+                      <MenuItem
+                        key={`${index}-${
+                          index === selectedVectorIndex ? "selected" : "normal"
+                        }`}
+                        value={index}
+                        sx={menuItemSx}
+                      >
+                        {index}
+                      </MenuItem>
+                    ))}
               </Select>
             </Grid>
             <Grid item> </Grid>

@@ -206,10 +206,9 @@ export default function LoginForm() {
           component={Link}
           onClick={handleClick}
           target="_blank"
-          sx={{ borderColor: "gray", 
-            }}
+          sx={{ borderColor: "gray", height:"40px",width:"40px"}}
         >
-          <SiMicrosoftazure style={{ color: "#0078D4",width: "1em", height: "1em" }} />
+          <SiMicrosoftazure style={{ color: "#0078D4",width: "24px", height: "24px" ,marginLeft:"8px",marginTop:"8px"}} />
         </IconButton>
       </Box>
     </Box>
