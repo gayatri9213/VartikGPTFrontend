@@ -20,8 +20,8 @@ import "react-toastify/dist/ReactToastify.css";
 const selectSx = { fontSize: "14px", height: "2rem" };
 const menuItemSx = { fontSize: "14px", fontWeight: "300" };
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;;
-const VECTOR_STORE_API_BASE_URL = process.env.REACT_APP_VECTORDB_API_BASE_URL;
+ const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api";
+const VECTOR_STORE_API_BASE_URL = "http://dataingestion.eastus.azurecontainer.io:8011/v1/index"
 
 export default function RightSideBar({
   openRightSideBar,
@@ -211,8 +211,10 @@ export default function RightSideBar({
           Accept: "text/plain",
         },
       });
+    
       return { data: response.data, error: null };
     } catch (error) {
+      console.log(`${API_BASE_URL}`)
       toast.error("Error fetching LLM Ref data");
       console.error("Error fetching LLM Ref data:", error);
       return { data: null, error: error.message };
@@ -220,6 +222,7 @@ export default function RightSideBar({
   };
 
   useEffect(() => {
+    
     const fetchLLMData = async () => {
       const { data, error } = await getLLMRefData();
       if (data) {
