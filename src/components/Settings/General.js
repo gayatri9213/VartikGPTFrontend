@@ -21,7 +21,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api"
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const initialFormData = {
   userId: 0,
@@ -268,7 +268,7 @@ export default function General({ onDepartmentNameChange }) {
         UniqueuserId: formData.UniqueAzureId,
         chunkingType: formData.chunkingType,
         vectorStore: formData.vectorStore,
-    vectorIndex: formData.vectorIndex,
+        vectorIndex: formData.vectorIndex,
       };
       // Create or update session
       let sessionResponse;

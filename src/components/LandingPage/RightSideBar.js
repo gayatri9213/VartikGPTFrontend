@@ -20,10 +20,10 @@ import "react-toastify/dist/ReactToastify.css";
 const selectSx = { fontSize: "14px", height: "2rem" };
 const menuItemSx = { fontSize: "14px", fontWeight: "300" };
 
-const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const VECTOR_STORE_API_BASE_URL =
   process.env.NODE_ENV === "development"
-    ? "http://dataingestion.eastus.azurecontainer.io:8011/v1/index"
+    ? "http://dataingestion.eastus.azurecontainer.io:80/v1/index"
     : process.env.REACT_APP_VECTORDB_API_BASE_URL;
 
 export default function RightSideBar({

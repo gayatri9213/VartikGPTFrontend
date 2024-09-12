@@ -9,7 +9,7 @@ import { useLogout } from "../Logout/helper";
 import Image from "next/image";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 
-const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api"
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
   const logout = useLogout();
@@ -30,12 +30,6 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
       }
     }
   }, []);
-
-  // useEffect(() => {
-  //   if (uniqueId) {
-  //     fetchChatHistoryByUserId(uniqueId);
-  //   }
-  // }, [uniqueId]);
 
   useEffect(() => {
     if (uniqueId) {
@@ -89,6 +83,7 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
         })
       );
       const recentChats = Array.from(sessionMessagesMap.values());
+      recentChats.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       setRecentChats(recentChats);
     } catch (error) {
       console.error("Error fetching chat history by user ID:", error);
@@ -149,11 +144,7 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
         </Box>
       </Grid>
 
-      <Button
-        variant="contained"
-        sx={{ my: 2 }}
-        onClick={handleNewChat}
-      >
+      <Button variant="contained" sx={{ my: 2 }} onClick={handleNewChat}>
         New Chat
       </Button>
       <Grid sx={{ fontsize: "0.75rem", fontWeight: "500", my: 2 }}>Recent</Grid>
@@ -174,7 +165,7 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
         />
       ))}
 
-      <Grid 
+      <Grid
         mt="auto"
         container
         spacing={0.1}

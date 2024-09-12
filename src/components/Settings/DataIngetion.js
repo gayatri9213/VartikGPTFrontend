@@ -26,12 +26,15 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api"
-const INJECT_API_BASE_URL = process.env.NODE_ENV === 'development' ? 
-"http://dataingestion.eastus.azurecontainer.io:8011/v1/dataingestion/ingest": process.env.REACT_APP_INJECT_API_BASE_URL;
-const VECTOR_STORE_API_BASE_URL =  process.env.NODE_ENV === 'development' 
-? 'http://dataingestion.eastus.azurecontainer.io:8011/v1/index'
-: process.env.REACT_APP_VECTORDB_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const INJECT_API_BASE_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://dataingestion.eastus.azurecontainer.io:80/v1/dataingestion/ingest"
+    : process.env.REACT_APP_INJECT_API_BASE_URL;
+const VECTOR_STORE_API_BASE_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://dataingestion.eastus.azurecontainer.io:80/v1/index"
+    : process.env.REACT_APP_VECTORDB_API_BASE_URL;
 
 export default function App() {
   const [tabIndex, setTabIndex] = useState(0);
@@ -70,7 +73,6 @@ function DataIngetion() {
     departmentId: "",
     status: 0,
   });
-
   const [embLLMTypes, setEmbLLMTypes] = useState([]);
   const [embLLMNames, setEmbLLMNames] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -459,7 +461,6 @@ function DataIngetion() {
 function StatusTable() {
   const [statusData, setStatusData] = useState([]);
   const [departments, setDepartments] = useState({});
-  const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -532,10 +533,6 @@ function StatusTable() {
 
   return (
     <Grid container spacing={2}>
-      {/* <Grid item xs={12}>
-      <ToastContainer />
-     
-      </Grid> */}
       <Grid item xs={12}>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">

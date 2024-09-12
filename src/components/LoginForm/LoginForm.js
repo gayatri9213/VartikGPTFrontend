@@ -43,7 +43,7 @@ export default function LoginForm() {
     vectorIndex: "",
   });
 
-  const API_BASE_URL = "https://vartikgptbackend.azurewebsites.net/api"
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   const getUser = async (uniqueAzureId) => {
     try {
@@ -206,9 +206,17 @@ export default function LoginForm() {
           component={Link}
           onClick={handleClick}
           target="_blank"
-          sx={{ borderColor: "gray", height:"40px",width:"40px"}}
+          sx={{ borderColor: "gray", height: "40px", width: "40px" }}
         >
-          <SiMicrosoftazure style={{ color: "#0078D4",width: "24px", height: "24px" ,marginLeft:"8px",marginTop:"8px"}} />
+          <SiMicrosoftazure
+            style={{
+              color: "#0078D4",
+              width: "24px",
+              height: "24px",
+              marginLeft: "8px",
+              marginTop: "8px",
+            }}
+          />
         </IconButton>
       </Box>
     </Box>

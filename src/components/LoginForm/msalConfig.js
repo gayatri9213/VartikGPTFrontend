@@ -9,8 +9,6 @@ export const msalConfig = {
     cacheLocation: "localStorage",
     storeAuthStateInCookie: true,
   },
-  
- 
 };
 export const loginRequest = {
   scopes: ["User.Read", "Directory.Read.All"],

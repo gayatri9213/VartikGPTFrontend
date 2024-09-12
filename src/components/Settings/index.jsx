@@ -16,7 +16,7 @@ export default function Settings() {
 
   // Handle Department change (According to department tabs will handle)
   const handleDepartmentNameChange = (departmentName) => {
-    if (departmentName === "ADMIN") {
+    if (departmentName === "IT") {
       setShowDataIngestionTab(true);
       setshowVectorDBTab(true);
     } else {
