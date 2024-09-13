@@ -98,20 +98,17 @@ export default function RightSideBar({
   const handleVectorStoreChange = async (event) => {
     const value = event.target.value;
     setSelectedVectorStore(value);
+    // Reset vector indexes and selected index when vector store changes
+    setVectorIndexes([]);
+    setSelectedVectorIndex("");
+
     const indexes = await fetchIndexes(value);
-    // Update vectorIndexes and check selectedVectorIndex
-    if (indexes.includes(selectedVectorIndex)) {
-      setVectorIndexes(indexes);
-      setSelectedVectorIndex(selectedVectorIndex);
-    } else {
-      setVectorIndexes(indexes);
-      setSelectedVectorIndex(selectedVectorIndex); // or set to a default value
-    }
+    setVectorIndexes(indexes);
 
     saveFormDataToLocalStorage({
       ...JSON.parse(localStorage.getItem("formData") || "{}"),
       vectorStore: value,
-      vectorIndex: selectedVectorIndex, // Ensure this is included
+      vectorIndex: "", // Ensure this is included
     });
 
     const departmentId = JSON.parse(
