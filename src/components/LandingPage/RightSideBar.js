@@ -124,6 +124,7 @@ export default function RightSideBar({
           console.log("Showing all indexes for admin:", indexes);
         }
         else{
+          
           const vectorStoreData = await fetchVectorStoreData(value, departmentId);
           if (vectorStoreData && Array.isArray(vectorStoreData)) {
             // Filter the vectorStoreData to find matches with indexes
