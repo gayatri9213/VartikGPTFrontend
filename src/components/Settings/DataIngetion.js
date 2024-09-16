@@ -257,6 +257,8 @@ function DataIngetion() {
         index_name: formDataToSubmit.vectorIndex,
         vector_store_name: formDataToSubmit.vectorStore,
         chunking_type: formDataToSubmit.chunkingType,
+        embedding_type:formDataToSubmit.embLLMType,
+        embedding_model:formDataToSubmit.embLLMName
       };
 
       console.log(secondApiPayload);
