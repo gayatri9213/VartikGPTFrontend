@@ -150,6 +150,7 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
         index_name: localStorageData.vectorIndex,
         llm_type: localStorageData.llmVendor,
         llm_model: localStorageData.llmModel,
+        llm_deployment:localStorageData.llmModel,
         vartikgpt_temp: parseFloat(localStorageData.temp).toFixed(1),
         max_tokens: localStorageData.maxTokens,
         caching_enabled: cachingEnabled,
