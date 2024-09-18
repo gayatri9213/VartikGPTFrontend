@@ -128,7 +128,7 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
         }
       }
       // Save the message to the server
-      await axios.post(`${API_BASE_URL}/ChatHistory`, {
+      const a= await axios.post(`${API_BASE_URL}/ChatHistory`, {
         userId: userId,
         sessionId: selectedSessionId,
         role: "User",
@@ -137,7 +137,7 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
         cachingEnabled: cachingEnabled,
         routingEnabled: routingEnabled,
       });
-
+      console.log("a",a)
       // Create request body with fixed indexwise order
       const requestBody = {
         user_id: userId.toString(),
@@ -150,6 +150,7 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
         index_name: localStorageData.vectorIndex,
         llm_type: localStorageData.llmVendor,
         llm_model: localStorageData.llmModel,
+        llm_deployment:localStorageData.llmModel,
         vartikgpt_temp: parseFloat(localStorageData.temp).toFixed(1),
         max_tokens: localStorageData.maxTokens,
         caching_enabled: cachingEnabled,
@@ -164,6 +165,7 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
         },
         body: JSON.stringify(requestBody),
       });
+      console.log("response",response)
       if (response.ok) {
         if (
           response.headers.get("Content-Type")?.includes("application/json")
@@ -217,7 +219,7 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
           ...prevMessages,
           {
             role: "assistant",
-            message: `Server Error: ${response.statusText}`,
+            message: `Server Error: ${response.statusText},Please contact Admin`,
           },
         ]);
       } else {

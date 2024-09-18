@@ -97,43 +97,55 @@ export default function RightSideBar({
   const handleVectorStoreChange = async (event) => {
     const value = event.target.value;
     setSelectedVectorStore(value);
-    // Reset vector indexes and selected index when vector store changes
     setVectorIndexes([]);
     setSelectedVectorIndex("");
 
     const indexes = await fetchIndexes(value);
-    setVectorIndexes(indexes);
 
     saveFormDataToLocalStorage({
       ...JSON.parse(localStorage.getItem("formData") || "{}"),
       vectorStore: value,
-      vectorIndex: "", // Ensure this is included
+      vectorIndex: "",
     });
 
     const departmentId = JSON.parse(
       localStorage.getItem("formData") || "{}"
     ).departmentId;
+
     if (departmentId) {
       try {
-        const vectorStoreData = await fetchVectorStoreData(value, departmentId);
-        if (vectorStoreData && Array.isArray(vectorStoreData)) {
-          // Filter the vectorStoreData to find matches with indexes
-          const matchedIndexes = vectorStoreData
-            .filter((item) => indexes.includes(item.vectorIndex))
-            .map((item) => item.vectorIndex);
-          console.log(matchedIndexes);
-          if (matchedIndexes.length > 0) {
-            console.log("Matched indexes found:", matchedIndexes);
-            // Display the matched vectorStoreData values as needed
-            setVectorIndexes(matchedIndexes);
+        const response = await fetch(`${API_BASE_URL}/Department`);
+        const departments = await response.json();
+        const adminDepartment = departments.find(dept => dept.name === "ADMIN");
+
+        if (adminDepartment && departmentId == adminDepartment.id) {
+          setVectorIndexes(indexes);
+          console.log("Showing all indexes for admin:", indexes);
+        }
+        else{
+          
+          const vectorStoreData = await fetchVectorStoreData(value, departmentId);
+          if (vectorStoreData && Array.isArray(vectorStoreData)) {
+            // Filter the vectorStoreData to find matches with indexes
+            const matchedIndexes = vectorStoreData
+              .filter((item) => indexes.includes(item.vectorIndex))
+              .map((item) => item.vectorIndex);
+            console.log(matchedIndexes);
+            if (matchedIndexes.length > 0) {
+              console.log("Matched indexes found:", matchedIndexes);
+              // Display the matched vectorStoreData values as needed
+              setVectorIndexes(matchedIndexes);
+            } else {
+              console.log("No matching indexes found.");
+              setVectorIndexes([]);
+            }
           } else {
-            console.log("No matching indexes found.");
+            toast.error(`No data found for vector store ${value}`);
             setVectorIndexes([]);
           }
-        } else {
-          toast.error(`No data found for vector store ${value}`);
-          setVectorIndexes([]);
         }
+
+        
       } catch (error) {
         toast.error(`Error fetching vector store data for ${value}`);
         console.error(`Error fetching vector store data for ${value}:`, error);
