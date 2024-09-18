@@ -19,6 +19,7 @@ import {
   TableRow,
   Paper,
   Grid,
+  TablePagination,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Swal from "sweetalert2";
@@ -463,6 +464,8 @@ function DataIngetion() {
 function StatusTable() {
   const [statusData, setStatusData] = useState([]);
   const [departments, setDepartments] = useState({});
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -477,6 +480,8 @@ function StatusTable() {
         );
         const data = dataIngestionResponse.data;
         console.log(data.error);
+
+        data.sort((a, b) => b.departmentId - a.departmentId);
 
         // Extract department IDs
         const deptIds = Array.from(
@@ -533,7 +538,16 @@ function StatusTable() {
     }
   };
 
-  return (
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+ return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <TableContainer component={Paper}>
@@ -555,38 +569,49 @@ function StatusTable() {
                   </TableCell>
                 </TableRow>
               ) : (
-                statusData.map((row, index) => (
-                  <TableRow sx={{ textAlign: "center" }} key={index}>
-                    <TableCell>
-                      {departments[row.departmentId] || "Loading..."}
-                    </TableCell>
-                    <TableCell>{row.vectorStore}</TableCell>
-                    <TableCell>{row.vectorIndex}</TableCell>
-                    <TableCell>{row.chunkingType}</TableCell>
-                    <TableCell>
-                      <LoadingButton
-                        size="small"
-                        variant="contained"
-                        color="primary"
-                        sx={{
-                          mt: 2,
-                          textAlign: "left",
-                          lineHeight: "1rem",
-                          marginTop: "5px",
-                        }}
-                        disabled={row.status === 0}
-                        onClick={() => handleCheckStatus(row.status, row.error)}
-                      >
-                        Check Status
-                      </LoadingButton>
-                    </TableCell>
-                  </TableRow>
-                ))
+                statusData
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row, index) => (
+                    <TableRow sx={{ textAlign: "center" }} key={index}>
+                      <TableCell>
+                        {departments[row.departmentId] || "Loading..."}
+                      </TableCell>
+                      <TableCell>{row.vectorStore}</TableCell>
+                      <TableCell>{row.vectorIndex}</TableCell>
+                      <TableCell>{row.chunkingType}</TableCell>
+                      <TableCell>
+                        <LoadingButton
+                          size="small"
+                          variant="contained"
+                          color="primary"
+                          sx={{
+                            mt: 2,
+                            textAlign: "left",
+                            lineHeight: "1rem",
+                            marginTop: "5px",
+                          }}
+                          disabled={row.status === 0}
+                          onClick={() => handleCheckStatus(row.status, row.error)}
+                        >
+                          Check Status
+                        </LoadingButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
               )}
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={statusData.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </Grid>
     </Grid>
-  );
+ );
 }

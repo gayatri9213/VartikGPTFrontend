@@ -13,6 +13,7 @@ const nextConfig = {
     REACT_APP_VECTORDB_API_BASE_URL:
       process.env.REACT_APP_VECTORDB_API_BASE_URL,
   },
+  
 };
 
 module.exports = nextConfig; // Use CommonJS syntax here

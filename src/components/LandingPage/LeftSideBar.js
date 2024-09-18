@@ -8,6 +8,7 @@ import LogoutIcon from "@mui/icons-material/ExitToApp";
 import { useLogout } from "../Logout/helper";
 import Image from "next/image";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -16,6 +17,8 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
   const [username, setUsername] = useState("");
   const [uniqueId, setUniqueId] = useState("");
   const [recentChats, setRecentChats] = useState([]);
+  const [showAll, setShowAll] = useState(false);
+  const [hoveredChat, setHoveredChat] = useState(null); // Track hovered chat
 
   useEffect(() => {
     const storedResponse = localStorage.getItem("azureAccount");
@@ -62,6 +65,7 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
             `${API_BASE_URL}/ChatHistory/session/${session.sessionId}`
           );
           const chatHistory = chatResponse.data;
+         
           const relevantMessage =
             chatHistory
               .filter((msg) => msg.role.toLowerCase() === "user")
@@ -84,6 +88,7 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
       );
       const recentChats = Array.from(sessionMessagesMap.values());
       recentChats.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
       setRecentChats(recentChats);
     } catch (error) {
       console.error("Error fetching chat history by user ID:", error);
@@ -111,6 +116,28 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
       }
     } catch (error) {
       console.error("Error updating session ID:", error);
+    }
+  };
+
+   // Handle chat deletion
+   const handleDeleteChat = async (sessionId) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/ChatHistory/session/${sessionId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'accept': 'text/plain',
+          },
+        }
+      );
+      if (response && response.status == 204) {
+        setRecentChats((prevChats) => prevChats.filter((chat) => chat.sessionId !== sessionId));
+      } else {
+        console.error('Failed to delete chat:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error deleting chat:', error);
     }
   };
 
@@ -147,38 +174,68 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
       <Button variant="contained" sx={{ my: 2 }} onClick={handleNewChat}>
         New Chat
       </Button>
-      <Grid sx={{ fontsize: "0.75rem", fontWeight: "500", my: 2 }}>Recent</Grid>
-      {recentChats.map((chat) => (
-        <Component
+
+      <Grid sx={{ fontSize: "1rem", fontWeight: "600", my: 2, padding:"0px" }}>Recent</Grid>
+
+      {/* Show only 5 recent chats by default */}
+      {recentChats.slice(0, showAll ? recentChats.length : 5).map((chat) => (
+        <Box
           key={chat.sessionId}
-          label={
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <ChatBubbleOutlineIcon fontSize="small" sx={{ mr: 1 }} />
-              {chat.message
-                ? chat.message.substring(0, 30) + "..."
-                : "New Chat"}
-            </Box>
-          }
-          onClick={() => {
-            handleChatSelect(chat.sessionId);
+          sx={{
+            padding:"0px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            '&:hover .delete-icon': { display: 'block' },  // Show delete icon on hover
+            mb: 1,
           }}
-        />
+          onMouseEnter={() => setHoveredChat(chat.sessionId)} // Track which chat is hovered
+          onMouseLeave={() => setHoveredChat(null)} // Reset hover state
+        >
+          <Box
+            sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+            onClick={() => handleChatSelect(chat.sessionId)}
+          >
+            <ChatBubbleOutlineIcon fontSize="small" sx={{ mr: 1 }} />
+
+            {/* Display full message when not hovered, shortened message when hovered */}
+            {hoveredChat === chat.sessionId 
+              ? (chat.message ? chat.message.substring(0, 15) + "..." : "New Chat") 
+              : (chat.message ? chat.message.substring(0, 20) + "..." : "New Chat")}
+          </Box>
+
+          {/* Delete Icon, hidden by default */}
+          <DeleteIcon
+            className="delete-icon"
+            sx={{ display: 'none', cursor: 'pointer' }}
+            onClick={() => handleDeleteChat(chat.sessionId)}
+          />
+        </Box>
       ))}
 
+      {/* Show "Show more" link if there are more than 5 chats */}
+      {recentChats.length > 5 && (
+        <Button onClick={() => setShowAll((prev) => !prev)}>
+          {showAll ? "Show less" : "Show more"}
+        </Button>
+      )}
+
       <Grid
+      
         mt="auto"
         container
+        padding="0px"
         spacing={0.1}
         rowSpacing={0.05}
         sx={{ marginBottom: "-10px", position: "relative" }}
       >
-        <Component icon={<PersonIcon />} label={username} height="25px" />
-        <Component
+        <Component className="css-hdnqye-MuiGrid-root" icon={<PersonIcon />} label={username} height="25px" />
+        <Component className="css-19ergew-MuiGrid-root "
           icon={<SettingsIcon />}
           label={"Settings"}
           onClick={() => setSelectedTab("Settings")}
         />
-        <Component icon={<LogoutIcon />} label={"Logout"} onClick={logout} />
+        <Component className="css-19ergew-MuiGrid-root " icon={<LogoutIcon />} label={"Logout"} onClick={logout} />
       </Grid>
     </Box>
   );
