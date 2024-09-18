@@ -236,13 +236,13 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
         rowSpacing={0.05}
         sx={{ marginBottom: "-10px", position: "relative" }}
       >
-        <Component icon={<PersonIcon />} label={username} height="25px" />
-        <Component
+        <Component padding = "0px" icon={<PersonIcon />} label={username} height="25px" />
+        <Component padding = "0px"
           icon={<SettingsIcon />}
           label={"Settings"}
           onClick={() => setSelectedTab("Settings")}
         />
-        <Component icon={<LogoutIcon />} label={"Logout"} onClick={logout} />
+        <Component padding = "0px" icon={<LogoutIcon />} label={"Logout"} onClick={logout} />
       </Grid>
     </Box>
   );

@@ -3,11 +3,13 @@ import { Tabs, Tab, Box, Grid } from "@mui/material";
 import General from "./General";
 import VectorDB from "./VectorDB";
 import DataIngetion from "./DataIngetion";
+import Department from "./Department";
 
 export default function Settings() {
   const [value, setValue] = useState(0);
   const [showVectorDBTab, setshowVectorDBTab] = useState(false);
   const [showDataIngestionTab, setShowDataIngestionTab] = useState(false);
+  const [showDepartmentTab, setShowDepartmentTab] = useState(false);
 
   // Handle Settings tab change
   const handleChange = (event, newValue) => {
@@ -19,9 +21,11 @@ export default function Settings() {
     if (departmentName === "ADMIN") {
       setShowDataIngestionTab(true);
       setshowVectorDBTab(true);
+      setShowDepartmentTab(true);
     } else {
       setShowDataIngestionTab(false);
       setshowVectorDBTab(false);
+      setShowDepartmentTab(false);
     }
   };
 
@@ -56,6 +60,7 @@ export default function Settings() {
             {showDataIngestionTab && (
               <Tab label="Data Ingestion" {...tabProps(2)} />
             )}
+            <Tab label="Department" {...tabProps(3)} />
           </Tabs>
         </Box>
       </Grid>
@@ -65,6 +70,7 @@ export default function Settings() {
         )}
         {value === 1 && showVectorDBTab && <VectorDB />}
         {value === 2 && showDataIngestionTab && <DataIngetion />}
+        {value === 3 && showDepartmentTab && <Department/>}
       </Grid>
     </Grid>
   );
