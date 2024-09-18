@@ -60,7 +60,10 @@ export default function Settings() {
             {showDataIngestionTab && (
               <Tab label="Data Ingestion" {...tabProps(2)} />
             )}
-            <Tab label="Department" {...tabProps(3)} />
+            {showDepartmentTab && (
+              <Tab label="Department" {...tabProps(3)} />
+            )}
+            
           </Tabs>
         </Box>
       </Grid>
