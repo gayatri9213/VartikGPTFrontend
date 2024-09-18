@@ -17,6 +17,8 @@ import { SiMicrosoftazure } from "react-icons/si";
 import Image from "next/image";
 import { loginRequest } from "../LoginForm/msalConfig";
 import { useRouter } from "next/router";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function LoginForm() {
   const { instance } = useMsal();
@@ -117,11 +119,10 @@ export default function LoginForm() {
           });
         }
       }
-
       router.push("/homepage");
     } catch (e) {
       console.error(e);
-      alert("Login failed, please try again.");
+      toast.error(`Login failed, please try again.`);
     } finally {
       setLoading(false);
     }
@@ -132,9 +133,10 @@ export default function LoginForm() {
     localStorage.setItem("formData", JSON.stringify(formData));
   }, [formData]);
   return (
+    
     <Box
       sx={{ bgcolor: "background.paper", p: 4, borderRadius: 2, boxShadow: 3 }}
-    >
+    ><ToastContainer />
       <Box
         sx={{
           display: "flex",

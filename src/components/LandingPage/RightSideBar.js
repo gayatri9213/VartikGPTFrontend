@@ -59,7 +59,6 @@ export default function RightSideBar({
       return response.data;
     } catch (error) {
       toast.error(`Error fetching vector store data for ${vectorStore}`);
-      //  console.error("Error fetching vector store data:", error);
       return [];
     }
   };
