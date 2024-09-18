@@ -235,13 +235,13 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
         rowSpacing={0.05}
         sx={{ marginBottom: "-10px", position: "relative" ,padding:"0px"}}
       >
-        <Component className="css-73imaa" sx={{padding: "0px"}} icon={<PersonIcon />} label={username}  />
-        <Component className="css-pc7201" sx={{padding:"0px"}}
+        <Component className="css-73imaa" sx={{padding: "0px !important" }} icon={<PersonIcon />} label={username}  />
+        <Component className="css-pc7201" sx={{padding:"0px !important"}}
           icon={<SettingsIcon />}
           label={"Settings"}
           onClick={() => setSelectedTab("Settings")}
         />
-        <Component className="css-pc7201" sx={{padding:"0px"}} icon={<LogoutIcon />} label={"Logout"} onClick={logout} />
+        <Component className="css-pc7201" sx={{padding:"0px !important"}} icon={<LogoutIcon />} label={"Logout"} onClick={logout} />
       </Grid>
     </Box>
   );
