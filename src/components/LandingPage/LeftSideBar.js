@@ -8,7 +8,7 @@ import LogoutIcon from "@mui/icons-material/ExitToApp";
 import { useLogout } from "../Logout/helper";
 import Image from "next/image";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -65,7 +65,7 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
             `${API_BASE_URL}/ChatHistory/session/${session.sessionId}`
           );
           const chatHistory = chatResponse.data;
-         
+
           const relevantMessage =
             chatHistory
               .filter((msg) => msg.role.toLowerCase() === "user")
@@ -119,25 +119,27 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
     }
   };
 
-   // Handle chat deletion
-   const handleDeleteChat = async (sessionId) => {
+  // Handle chat deletion
+  const handleDeleteChat = async (sessionId) => {
     try {
       const response = await fetch(
         `${API_BASE_URL}/ChatHistory/session/${sessionId}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
           headers: {
-            'accept': 'text/plain',
+            accept: "text/plain",
           },
         }
       );
       if (response && response.status == 204) {
-        setRecentChats((prevChats) => prevChats.filter((chat) => chat.sessionId !== sessionId));
+        setRecentChats((prevChats) =>
+          prevChats.filter((chat) => chat.sessionId !== sessionId)
+        );
       } else {
-        console.error('Failed to delete chat:', response.statusText);
+        console.error("Failed to delete chat:", response.statusText);
       }
     } catch (error) {
-      console.error('Error deleting chat:', error);
+      console.error("Error deleting chat:", error);
     }
   };
 
@@ -175,18 +177,20 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
         New Chat
       </Button>
 
-      <Grid sx={{ fontSize: "1rem", fontWeight: "600", my: 2, padding:"0px" }}>Recent</Grid>
+      <Grid sx={{ fontSize: "1rem", fontWeight: "600", my: 2, padding: "0px" }}>
+        Recent
+      </Grid>
 
       {/* Show only 5 recent chats by default */}
       {recentChats.slice(0, showAll ? recentChats.length : 5).map((chat) => (
         <Box
           key={chat.sessionId}
           sx={{
-            padding:"0px",
+            padding: "0px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            '&:hover .delete-icon': { display: 'block' },  // Show delete icon on hover
+            "&:hover .delete-icon": { display: "block" }, // Show delete icon on hover
             mb: 1,
           }}
           onMouseEnter={() => setHoveredChat(chat.sessionId)} // Track which chat is hovered
@@ -199,15 +203,19 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
             <ChatBubbleOutlineIcon fontSize="small" sx={{ mr: 1 }} />
 
             {/* Display full message when not hovered, shortened message when hovered */}
-            {hoveredChat === chat.sessionId 
-              ? (chat.message ? chat.message.substring(0, 15) + "..." : "New Chat") 
-              : (chat.message ? chat.message.substring(0, 20) + "..." : "New Chat")}
+            {hoveredChat === chat.sessionId
+              ? chat.message
+                ? chat.message.substring(0, 15) + "..."
+                : "New Chat"
+              : chat.message
+              ? chat.message.substring(0, 20) + "..."
+              : "New Chat"}
           </Box>
 
           {/* Delete Icon, hidden by default */}
           <DeleteIcon
             className="delete-icon"
-            sx={{ display: 'none', cursor: 'pointer' }}
+            sx={{ display: "none", cursor: "pointer" }}
             onClick={() => handleDeleteChat(chat.sessionId)}
           />
         </Box>
@@ -221,7 +229,6 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
       )}
 
       <Grid
-      
         mt="auto"
         container
         padding="0px"
@@ -229,13 +236,13 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
         rowSpacing={0.05}
         sx={{ marginBottom: "-10px", position: "relative" }}
       >
-        <Component className="css-hdnqye-MuiGrid-root" icon={<PersonIcon />} label={username} height="25px" />
-        <Component className="css-19ergew-MuiGrid-root "
+        <Component icon={<PersonIcon />} label={username} height="25px" />
+        <Component
           icon={<SettingsIcon />}
           label={"Settings"}
           onClick={() => setSelectedTab("Settings")}
         />
-        <Component className="css-19ergew-MuiGrid-root " icon={<LogoutIcon />} label={"Logout"} onClick={logout} />
+        <Component icon={<LogoutIcon />} label={"Logout"} onClick={logout} />
       </Grid>
     </Box>
   );
