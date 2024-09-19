@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { useMsal } from "@azure/msal-react";
+import { v4 as uuidv4 } from "uuid";
 import {
   Box,
   Button,
@@ -31,18 +32,19 @@ export default function LoginForm() {
     uniqueAzureId: "",
     departmentId: "",
     departmentName: "",
-    sessionId: "",
-    llmVendor: "",
-    llmModel: "",
-    embLLMVendor: "",
-    embLLMModel: "",
-    chunkingType: "",
+    sessionId: uuidv4(),
+    llmVendor: "AzureOpenAI",
+    llmModel: "gpt-4o",
+    embLLMVendor: "AzureOpenAI",
+    embLLMModel: "text-embedding-ada-002",
+    chunkingType: "Semantic",
     cacheEnabled: false,
     routingEnabled: false,
     temp: parseFloat(0.0).toFixed(1),
-    maxTokens: 0,
-    vectorStore: "",
-    vectorIndex: "",
+    maxTokens: parseInt(6450),
+
+    vectorStore: "AzureOpenAI",
+    vectorIndex: "hrindex",
   });
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -74,7 +76,6 @@ export default function LoginForm() {
   };
 
   const handleClick = async () => {
-    // Marked the function as async
     setLoading(true);
     try {
       const response = await instance.loginPopup(loginRequest);
@@ -82,43 +83,116 @@ export default function LoginForm() {
 
       const uniqueAzureId = response.uniqueId;
       console.log("user uniqueAzureId", uniqueAzureId);
-      const userData = await getUser(uniqueAzureId);
+
+      let departmentName = "";
+      let departmentId = "";
+      let sessionData = null;
+      let userData = null;
+
+      // Try to fetch user data
+      userData = await getUser(uniqueAzureId);
+
       if (userData) {
-        // Fetch Department Name
+        // Fetch Department Name if user data is available
         const fetchDepartmentName = await axios.get(
           `${API_BASE_URL}/Department/${userData.departmentId}`
         );
 
-        const sessionData = await getSession(userData.id);
+        departmentName = fetchDepartmentName.data.name || "";
+        departmentId = userData.departmentId || "";
+
+        // Fetch session data
+        sessionData = await getSession(userData.id);
         console.log("user data", userData);
-        if (sessionData) {
-          // Set form data with fetched data
-          setFormData((prevState) => {
-            const updatedFormData = {
-              ...prevState,
-              userId: userData.id || 0,
-              name: userData.name || "",
-              uniqueAzureId: userData.uniqueAzureId || "",
-              departmentId: userData.departmentId || "",
-              departmentName: fetchDepartmentName.data.name || "",
-              sessionId: sessionData?.sessionId || "",
-              llmVendor: sessionData?.llmVendor || "",
-              llmModel: sessionData?.llmModel || "",
-              embLLMVendor: sessionData?.embLLMVendor || "",
-              embLLMModel: sessionData?.embLLMModel || "",
-              chunkingType: sessionData?.chunkingType || "",
-              cacheEnabled: sessionData?.cacheEnabled || false,
-              routingEnabled: sessionData?.routingEnabled || false,
-              temp: parseFloat(sessionData?.temp || 0.0).toFixed(1),
-              maxTokens: sessionData?.maxTokens || 0,
-              vectorStore: sessionData?.vectorStore || "",
-              vectorIndex: sessionData?.vectorIndex || "",
-            };
-            console.log("Updated Form Data:", updatedFormData);
-            return updatedFormData;
+      } else {
+        if (!userData) {
+          // If the user or department is not found, fetch department by Azure role
+          console.log(
+            "User or department not found, fetching department by Azure role."
+          );
+
+          const graphResponse = await axios.get(
+            `https://graph.microsoft.com/v1.0/users/${uniqueAzureId}/memberOf`,
+            {
+              headers: {
+                Authorization: `Bearer ${response.accessToken}`,
+              },
+            }
+          );
+          const azureDepartmentName = graphResponse.data.value[1].displayName;
+
+          // Fetch or create category by department name
+          const categoryResponse = await axios.get(
+            `${API_BASE_URL}/Category/search?name=${encodeURIComponent(
+              azureDepartmentName
+            )}`
+          );
+          const categoryId = categoryResponse.data[0].id;
+
+          // Fetch department ID using the category
+          const fetchDepartmentIdResponse = await axios.get(
+            `${API_BASE_URL}/Department/GetDepartmentIdByCategoryId/${categoryId}`
+          );
+          departmentId = fetchDepartmentIdResponse.data.departmentId;
+          departmentName = azureDepartmentName;
+
+          console.log("Azure Department Name:", azureDepartmentName);
+
+          userData = await axios.post(`${API_BASE_URL}/User`, {
+            name: response.account.name,
+            uniqueAzureId: response.uniqueId,
+            departmentId,
           });
+
+          console.log("user data", userData);
+          const date = new Date();
+          sessionData = await axios.post(`${API_BASE_URL}/Sessions`, {
+            SessionId: formData.sessionId,
+            UserId: userData.data.id,
+            cacheEnabled: formData.cacheEnabled,
+            routingEnabled: formData.routingEnabled,
+            temp: formData.temp,
+            maxTokens: formData.maxTokens,
+            UpdatedDateTime: date,
+            llmVendor: formData.llmVendor,
+            llmModel: formData.llmModel,
+            embLLMVendor: formData.embLLMVendor,
+            embLLMModel: formData.embLLMModel,
+            UniqueuserId: userData.data.uniqueAzureId,
+            chunkingType: formData.chunkingType,
+            vectorStore: formData.vectorStore,
+            vectorIndex: formData.vectorIndex,
+          });
+          console.log(userData);
+        } else {
+          // Handle other status codes here
+          console.error("Non-404 error occurred:", error.response.data);
+          throw error; // Rethrow for outer catch to handle
         }
       }
+
+      // Set form data, using either session data or defaults
+      setFormData((prevState) => ({
+        ...prevState,
+        userId: userData?.data.id || 0,
+        name: userData?.data.name || "",
+        uniqueAzureId: userData?.data.uniqueAzureId || "",
+        departmentId: departmentId,
+        departmentName: departmentName,
+        sessionId: sessionData?.data.sessionId,
+        llmVendor: sessionData?.data.llmVendor,
+        llmModel: sessionData?.data.llmModel,
+        embLLMVendor: sessionData?.data.embLLMVendor || "",
+        embLLMModel: sessionData?.data.embLLMModel || "",
+        chunkingType: sessionData?.data.chunkingType || "",
+        cacheEnabled: sessionData?.data.cacheEnabled || false,
+        routingEnabled: sessionData?.data.routingEnabled || false,
+        temp: parseFloat(sessionData?.data.temp).toFixed(1),
+        maxTokens: sessionData?.data.maxTokens,
+        vectorStore: sessionData?.data.vectorStore,
+        vectorIndex: sessionData?.data.vectorIndex,
+      }));
+
       router.push("/homepage");
     } catch (e) {
       console.error(e);
@@ -133,10 +207,10 @@ export default function LoginForm() {
     localStorage.setItem("formData", JSON.stringify(formData));
   }, [formData]);
   return (
-    
     <Box
       sx={{ bgcolor: "background.paper", p: 4, borderRadius: 2, boxShadow: 3 }}
-    ><ToastContainer />
+    >
+      <ToastContainer />
       <Box
         sx={{
           display: "flex",
