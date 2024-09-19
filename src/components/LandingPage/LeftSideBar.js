@@ -8,7 +8,7 @@ import LogoutIcon from "@mui/icons-material/ExitToApp";
 import { useLogout } from "../Logout/helper";
 import Image from "next/image";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteIconImage from "../../../public/images/delete.png";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -186,7 +186,7 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
         <Box
           key={chat.sessionId}
           sx={{
-            padding: "0px",
+            padding: "1px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -200,7 +200,7 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
             sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
             onClick={() => handleChatSelect(chat.sessionId)}
           >
-            <ChatBubbleOutlineIcon fontSize="small" sx={{ mr: 1 }} />
+            <ChatBubbleOutlineIcon fontSize="small" sx={{ mr: 1, height:"18px",width:"18px",position:"relative",top:"2px"}} />
 
             {/* Display full message when not hovered, shortened message when hovered */}
             {hoveredChat === chat.sessionId
@@ -212,10 +212,15 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
               : "New Chat"}
           </Box>
 
-          {/* Delete Icon, hidden by default */}
-          <DeleteIcon
-            className="delete-icon"
-            sx={{ display: "none", cursor: "pointer" }}
+          <Image
+            src={DeleteIconImage}
+            alt="Delete Icon"
+            width={18}  // Adjust size as necessary
+            height={18}  // Adjust size as necessary
+            style={{
+              display: hoveredChat === chat.sessionId ? 'block' : 'none',
+              cursor: 'pointer',
+            }}
             onClick={() => handleDeleteChat(chat.sessionId)}
           />
         </Box>

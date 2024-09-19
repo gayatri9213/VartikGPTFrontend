@@ -19,14 +19,15 @@ import {
 import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from 'sweetalert2';
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 // Fetch category data from API
 const fetchCategories = async () => {
   const response = await fetch(
-    "https://vartikgptbackend.azurewebsites.net/api/Category",
+    `${API_BASE_URL}/Category`,
     {
       method: "GET",
       headers: { accept: "text/plain" },
@@ -38,7 +39,7 @@ const fetchCategories = async () => {
 // Fetch department data from API
 const fetchDepartments = async () => {
   const response = await fetch(
-    "https://vartikgptbackend.azurewebsites.net/api/Department",
+    `${API_BASE_URL}/Department`,
     {
       method: "GET",
       headers: { accept: "text/plain" },
@@ -49,7 +50,7 @@ const fetchDepartments = async () => {
 
 // Post a new category
 const postCategory = async (data) => {
-    const response = await fetch('https://vartikgptbackend.azurewebsites.net/api/Category', {
+    const response = await fetch(`${API_BASE_URL}/Category`, {
       method: 'POST',
       headers: {
         'accept': 'text/plain',
@@ -62,7 +63,7 @@ const postCategory = async (data) => {
   
   // Post a new department
   const postDepartment = async (data) => {
-    const response = await fetch('https://vartikgptbackend.azurewebsites.net/api/Department', {
+    const response = await fetch(`${API_BASE_URL}/Department`, {
       method: 'POST',
       headers: {
         'accept': 'text/plain',
@@ -73,40 +74,16 @@ const postCategory = async (data) => {
     return response.ok;
   };
 
-  const updateCategory = async (id, data) => {
-    const response = await fetch(`https://vartikgptbackend.azurewebsites.net/api/Category/${id}`, {
-      method: 'PUT',
-      headers: {
-        'accept': 'text/plain',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    return response.ok;
-  };
-  
   const deleteCategory = async (id) => {
-    const response = await fetch(`https://vartikgptbackend.azurewebsites.net/api/Category/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/Category/${id}`, {
       method: 'DELETE',
       headers: { 'accept': '*/*' },
     });
     return response.ok;
   };
   
-  const updateDepartment = async (id, data) => {
-    const response = await fetch(`https://vartikgptbackend.azurewebsites.net/api/Department/${id}`, {
-      method: 'PUT',
-      headers: {
-        'accept': 'text/plain',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    return response.ok;
-  };
-  
   const deleteDepartment = async (id) => {
-    const response = await fetch(`https://vartikgptbackend.azurewebsites.net/api/Department/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/Department/${id}`, {
       method: 'DELETE',
       headers: { 'accept': '*/*' },
     });
@@ -361,9 +338,7 @@ function Department() {
   
     return (
       <div>
-        <Typography variant="h5" component="h1" gutterBottom>
-          Show Departments
-        </Typography>
+        
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
