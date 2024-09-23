@@ -32,19 +32,18 @@ export default function LoginForm() {
     uniqueAzureId: "",
     departmentId: "",
     departmentName: "",
-    sessionId: uuidv4(),
-    llmVendor: "AzureOpenAI",
-    llmModel: "gpt-4o",
-    embLLMVendor: "AzureOpenAI",
-    embLLMModel: "text-embedding-ada-002",
-    chunkingType: "Semantic",
+    sessionId: "",
+    llmVendor: "",
+    llmModel: "",
+    embLLMVendor: "",
+    embLLMModel: "",
+    chunkingType: "",
     cacheEnabled: false,
     routingEnabled: false,
     temp: parseFloat(0.0).toFixed(1),
-    maxTokens: parseInt(6450),
-
-    vectorStore: "AzureOpenAI",
-    vectorIndex: "hrindex",
+    maxTokens: parseInt(0),
+    vectorStore: "",
+    vectorIndex: "",
   });
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -104,6 +103,34 @@ export default function LoginForm() {
         // Fetch session data
         sessionData = await getSession(userData.id);
         console.log("user data", userData);
+        if (sessionData) {
+          // Set form data with fetched data
+          setFormData((prevState) => {
+            const updatedFormData = {
+              ...prevState,
+              userId: userData.id || 0,
+              name: userData.name || "",
+              uniqueAzureId: userData.uniqueAzureId || "",
+              departmentId: userData.departmentId || "",
+              departmentName: fetchDepartmentName.data.name || "",
+              sessionId: sessionData?.sessionId || "",
+              llmVendor: sessionData?.llmVendor || "",
+              llmModel: sessionData?.llmModel || "",
+              embLLMVendor: sessionData?.embLLMVendor || "",
+              embLLMModel: sessionData?.embLLMModel || "",
+              chunkingType: sessionData?.chunkingType || "",
+              cacheEnabled: sessionData?.cacheEnabled || false,
+              routingEnabled: sessionData?.routingEnabled || false,
+              temp: parseFloat(sessionData?.temp || 0.0).toFixed(1),
+              maxTokens: sessionData?.maxTokens || 0,
+              vectorStore: sessionData?.vectorStore || "",
+              vectorIndex: sessionData?.vectorIndex || "",
+            };
+            console.log("Updated Form Data:", updatedFormData);
+            return updatedFormData;
+          });
+        }
+      
       } else {
         if (!userData) {
           // If the user or department is not found, fetch department by Azure role
@@ -146,32 +173,26 @@ export default function LoginForm() {
 
           console.log("user data", userData);
           const date = new Date();
+          const sessionid = uuidv4();
           sessionData = await axios.post(`${API_BASE_URL}/Sessions`, {
-            SessionId: formData.sessionId,
+            SessionId: sessionid,
             UserId: userData.data.id,
-            cacheEnabled: formData.cacheEnabled,
-            routingEnabled: formData.routingEnabled,
-            temp: formData.temp,
-            maxTokens: formData.maxTokens,
+            cacheEnabled: false,
+            routingEnabled: false,
+            temp: parseFloat(0.0).toFixed(1),
+            maxTokens: parseInt(6450),
             UpdatedDateTime: date,
-            llmVendor: formData.llmVendor,
-            llmModel: formData.llmModel,
-            embLLMVendor: formData.embLLMVendor,
-            embLLMModel: formData.embLLMModel,
+            llmVendor: "AzureOpenAI",
+            llmModel: "gpt-4o",
+            embLLMVendor: "AzureOpenAI",
+            embLLMModel: "text-embedding-ada-002",
             UniqueuserId: userData.data.uniqueAzureId,
-            chunkingType: formData.chunkingType,
-            vectorStore: formData.vectorStore,
-            vectorIndex: formData.vectorIndex,
+            chunkingType: "Semantic",
+            vectorStore: "AzureOpenAI",
+            vectorIndex: "hrindex",
           });
           console.log(userData);
-        } else {
-          // Handle other status codes here
-          console.error("Non-404 error occurred:", error.response.data);
-          throw error; // Rethrow for outer catch to handle
-        }
-      }
-
-      // Set form data, using either session data or defaults
+          // Set form data, using either session data or defaults
       setFormData((prevState) => ({
         ...prevState,
         userId: userData?.data.id || 0,
@@ -192,6 +213,14 @@ export default function LoginForm() {
         vectorStore: sessionData?.data.vectorStore,
         vectorIndex: sessionData?.data.vectorIndex,
       }));
+        } else {
+          // Handle other status codes here
+          console.error("Non-404 error occurred:", error.response.data);
+          throw error; // Rethrow for outer catch to handle
+        }
+      }
+
+      
 
       router.push("/homepage");
     } catch (e) {
