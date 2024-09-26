@@ -124,7 +124,7 @@ function Department() {
       categoryName: "",
       promptFile: "",
     });
-    const [editData, setEditData] = useState(null);
+
   
     useEffect(() => {
       // Fetch categories when the component mounts
@@ -172,43 +172,7 @@ function Department() {
       }
     };
   
-    const handleEdit = () => {
-      // Handle edit logic here, e.g., display a form with existing data
-    };
-  
-    const handleUpdate = async () => {
-      if (editData) {
-        const isCategory = categories.some(cat => cat.id === editData.id);
-        
-        if (isCategory) {
-          const success = await updateCategory(editData.id, formData);
-          if (success) {
-            toast.success("Category updated successfully");
-            setCategories((prevCategories) =>
-              prevCategories.map(cat =>
-                cat.id === editData.id ? { ...cat, ...formData } : cat
-              )
-            );
-          } else {
-            toast.error("Failed to update category");
-          }
-        } else {
-          const success = await updateDepartment(editData.id, formData);
-          if (success) {
-            toast.success("Department updated successfully");
-            setDepartments((prevDepartments) =>
-              prevDepartments.map(dep =>
-                dep.id === editData.id ? { ...dep, ...formData } : dep
-              )
-            );
-          } else {
-            toast.error("Failed to update department");
-          }
-          setEditData(null);
-          setFormData({ departmentName: "", categoryName: "", promptFile: "" });
-        }
-      }
-    };
+    
   
     return (
       <Container
@@ -264,9 +228,9 @@ function Department() {
           variant="contained"
           color="primary"
           sx={{ mt: 2, textAlign: "left" }}
-          onClick={editData ? handleUpdate : handleSubmit}
+          onClick={handleSubmit}
         >
-          {editData ? "Update" : "Submit"}
+          Submit
         </LoadingButton>
       </Container>
     );
@@ -281,8 +245,13 @@ function Department() {
       const fetchData = async () => {
         const categoryData = await fetchCategories();
         const departmentData = await fetchDepartments();
+       
+        console.log("Fetched Departments:", departmentData); // Debugging line
+        const filteredDepartments = departmentData.filter(dep => dep.name.toLowerCase() !== "admin");
+        console.log("Filtered Departments:", filteredDepartments); // Debugging line
+
         setCategories(categoryData);
-        setDepartments(departmentData);
+        setDepartments(filteredDepartments);
       };
       fetchData();
     }, []);
@@ -356,12 +325,6 @@ function Department() {
                   <TableCell>{getCategoryName(row.categoryId)}</TableCell>
                   <TableCell>{getPromptFile(row.categoryId)}</TableCell>
                   <TableCell>
-                    {/* <IconButton
-                      color="primary"
-                      onClick={() => handleEdit(row.id)}
-                    >
-                      <EditIcon />
-                    </IconButton> */}
                     <IconButton
                       color="error"
                       onClick={() => handleDelete(row.id)}

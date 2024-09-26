@@ -20,12 +20,14 @@ import {
   Paper,
   Grid,
   TablePagination,
+  IconButton,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const INJECT_API_BASE_URL =
@@ -258,8 +260,8 @@ function DataIngetion() {
         index_name: formDataToSubmit.vectorIndex,
         vector_store_name: formDataToSubmit.vectorStore,
         chunking_type: formDataToSubmit.chunkingType,
-        embedding_type:formDataToSubmit.embLLMType,
-        embedding_model:formDataToSubmit.embLLMName
+        embedding_type: formDataToSubmit.embLLMType,
+        embedding_model: formDataToSubmit.embLLMName,
       };
 
       console.log(secondApiPayload);
@@ -538,6 +540,32 @@ function StatusTable() {
     }
   };
 
+  const handleDeleteRecord = async (id) => {
+    const confirmDelete = await Swal.fire({
+      title: "Are you sure?",
+      text: "This record will be permanently deleted.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, cancel!",
+    });
+
+    if (confirmDelete.isConfirmed) {
+      try {
+        await axios.delete(`${API_BASE_URL}/DataIngestion/${id}`, {
+          headers: {
+            accept: "*/*",
+          },
+        });
+        setStatusData((prevData) => prevData.filter((row) => row.id !== id));
+        Swal.fire("Deleted!", "Your record has been deleted.", "success");
+      } catch (error) {
+        console.error("Error deleting record:", error);
+        Swal.fire("Error!", "There was an issue deleting the record.", "error");
+      }
+    }
+  };
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -547,7 +575,7 @@ function StatusTable() {
     setPage(0);
   };
 
- return (
+  return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <TableContainer component={Paper}>
@@ -591,10 +619,19 @@ function StatusTable() {
                             marginTop: "5px",
                           }}
                           disabled={row.status === 0}
-                          onClick={() => handleCheckStatus(row.status, row.error)}
+                          onClick={() =>
+                            handleCheckStatus(row.status, row.error)
+                          }
                         >
                           Check Status
                         </LoadingButton>
+                        <IconButton
+                      color="error"
+                      onClick={() => handleDeleteRecord(row.id)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                      
                       </TableCell>
                     </TableRow>
                   ))
@@ -613,5 +650,5 @@ function StatusTable() {
         />
       </Grid>
     </Grid>
- );
+  );
 }

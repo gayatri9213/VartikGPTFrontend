@@ -247,6 +247,14 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
     }
   };
 
+  // Add handleKeyDown to handle Enter key press
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSubmit();
+    }
+  };
+
   // Function to format messages with newlines
   const formatMessage = (msg) => {
     return msg.split("\n").map((line, index) => (
@@ -381,6 +389,7 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
           variant="outlined"
           value={message}
           onChange={handleMessageChange}
+          onKeyDown={handleKeyDown} 
           placeholder="Type your message here..."
         />
         <LoadingButton

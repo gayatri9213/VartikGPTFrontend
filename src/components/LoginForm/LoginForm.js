@@ -38,6 +38,7 @@ export default function LoginForm() {
     embLLMVendor: "",
     embLLMModel: "",
     chunkingType: "",
+    admin: false,
     cacheEnabled: false,
     routingEnabled: false,
     temp: parseFloat(0.0).toFixed(1),
@@ -119,6 +120,7 @@ export default function LoginForm() {
               embLLMVendor: sessionData?.embLLMVendor || "",
               embLLMModel: sessionData?.embLLMModel || "",
               chunkingType: sessionData?.chunkingType || "",
+              admin:sessionData?.admin || false,
               cacheEnabled: sessionData?.cacheEnabled || false,
               routingEnabled: sessionData?.routingEnabled || false,
               temp: parseFloat(sessionData?.temp || 0.0).toFixed(1),
@@ -177,6 +179,7 @@ export default function LoginForm() {
           sessionData = await axios.post(`${API_BASE_URL}/Sessions`, {
             SessionId: sessionid,
             UserId: userData.data.id,
+            admin:false,
             cacheEnabled: false,
             routingEnabled: false,
             temp: parseFloat(0.0).toFixed(1),
@@ -206,6 +209,7 @@ export default function LoginForm() {
         embLLMVendor: sessionData?.data.embLLMVendor || "",
         embLLMModel: sessionData?.data.embLLMModel || "",
         chunkingType: sessionData?.data.chunkingType || "",
+        admin:sessionData?.data.admin || false,
         cacheEnabled: sessionData?.data.cacheEnabled || false,
         routingEnabled: sessionData?.data.routingEnabled || false,
         temp: parseFloat(sessionData?.data.temp).toFixed(1),
@@ -218,9 +222,7 @@ export default function LoginForm() {
           console.error("Non-404 error occurred:", error.response.data);
           throw error; // Rethrow for outer catch to handle
         }
-      }
-
-      
+      }     
 
       router.push("/homepage");
     } catch (e) {

@@ -73,23 +73,28 @@ export default function General({ onDepartmentNameChange }) {
           ...prevState,
           ...sessionResponse.data,
           userId: userId,
+          admin:sessionResponse.data.admin,
           routingEnabled: sessionResponse.data.routingEnabled,
           cacheEnabled: sessionResponse.data.cacheEnabled,
           temp: parseFloat(sessionResponse.data.temp).toFixed(1),
           maxTokens: sessionResponse.data.maxTokens,
         }));
+        console.log(sessionResponse)
+
       }
     } catch (err) {
       if (err.response && err.response.status === 404) {
         setFormData((prevState) => ({
           ...prevState,
           userId: userId,
+          admin : formData.admin,
           routingEnabled: formData.routingEnabled || false,
           cacheEnabled: formData.cacheEnabled || false,
           temp:
             parseFloat(formData.temp).toFixed(1) || parseFloat(0.0).toFixed(1),
           maxTokens: formData.maxTokens || parseInt(0),
         }));
+        console.log(formData)
       }
     }
   }, []);
@@ -179,6 +184,7 @@ export default function General({ onDepartmentNameChange }) {
       const userId = userDataResponse.data.id || userDataResponse.data.user.id;
       // Fetch user session
       await fetchUserSession(userId);
+
       setFormData((prevState) => ({
         ...prevState,
         name: userResponse.account.name,
@@ -189,6 +195,7 @@ export default function General({ onDepartmentNameChange }) {
           categoryResponse.data?.[0]?.promptFile || prevState.promptFile,
         userId: userId,
       }));
+      console.log(formData)
       if (onDepartmentNameChange) {
         onDepartmentNameChange(departmentName);
       }
@@ -255,6 +262,7 @@ export default function General({ onDepartmentNameChange }) {
       const sessionData = {
         SessionId: formData.sessionId,
         UserId: formData.userId,
+        admin:formData.admin,
         cacheEnabled: formData.cacheEnabled,
         routingEnabled: formData.routingEnabled,
         temp:
@@ -270,6 +278,7 @@ export default function General({ onDepartmentNameChange }) {
         vectorStore: formData.vectorStore,
         vectorIndex: formData.vectorIndex,
       };
+      console.log("session Data",sessionData)
       // Create or update session
       let sessionResponse;
       try {
@@ -299,6 +308,7 @@ export default function General({ onDepartmentNameChange }) {
       };
       setFormData(updatedFormData);
       localStorage.setItem("formData", JSON.stringify(updatedFormData));
+      console.log("sds",updatedFormData)
       if (isUpdating) toast.success("Data updated successfully!");
       else toast.success("Data saved successfully!");
     } catch (err) {
@@ -337,14 +347,25 @@ export default function General({ onDepartmentNameChange }) {
           value={formData.name}
           onChange={handleChange}
         />
-        <FormControlLabel
+      {/* <FormControlLabel
           control={<Checkbox />}
           label="Admin"
           name="admin"
           checked={formData.admin}
           onChange={handleChange}
           disabled={formData.departmentName !== "ADMIN"}
-        />
+        /> */}
+        <FormControlLabel
+            control={
+              <Checkbox
+                name="admin"
+                checked={formData.admin}
+                onChange={handleChange}
+                disabled={formData.departmentName !== "ADMIN"}
+              />
+            }
+            label="Admin"
+          />
         <TextField
           name="departmentName"
           label="Department Name"

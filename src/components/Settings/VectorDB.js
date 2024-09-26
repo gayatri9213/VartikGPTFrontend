@@ -247,14 +247,15 @@ export default function VectorDB() {
       console.log(selectedVectorStore);
       if (selectedVectorStore === "AzureOpenAI") {
         try {
-          await axios.post(`${API_BASE_URL}/VectorStore`, {
+          const res = await axios.post(`${API_BASE_URL}/VectorStore`, {
             VectorIndex: vectorDBData.name,
             Type: selectedVectorStore,
             DepartmentId: vectorDBData.departmentId,
           });
+          console.log("res",res)
         } catch (err) {
           if (err.response && err.response.status === 409) {
-            toast.error(
+            console.error(
               `A record with the same vector index "${vectorDBData.name}" for department already exists.`
             );
           }
@@ -268,7 +269,7 @@ export default function VectorDB() {
           return;
         }
 
-        await axios.post(`${VectorDB_API_BASE_URL}/azuresearch/create`, {
+        const res1 = await axios.post(`${VectorDB_API_BASE_URL}/azuresearch/create`, {
           index_name: vectorDBData.name,
           fields: fields.map((field) => ({
             name: field.name,
@@ -278,6 +279,7 @@ export default function VectorDB() {
             searchable: field.searchable,
           })),
         });
+        console.log("res1",res1)
 
         toast.success(
           `Azure index "${vectorDBData.name}" created successfully.`
@@ -882,7 +884,7 @@ export default function VectorDB() {
                               size="small"
                               sx={{ mr: 1 }}
                             />
-                            <TextField
+                            {/* <TextField
                               label="Type"
                               value={field.type}
                               onChange={(e) =>
@@ -890,7 +892,23 @@ export default function VectorDB() {
                               }
                               size="small"
                               sx={{ mr: 1 }}
-                            />
+                            /> */}
+                            <FormControl size="small" sx={{ mr: 1 ,width:"197px"}}>
+      <InputLabel id={`select-type-label-${index}`}>Type</InputLabel>
+      <Select
+        labelId={`select-type-label-${index}`}
+        id={`select-type-${index}`}
+        name="type"
+        value={field.type}
+        onChange={(e) =>
+          handleFieldChange(index, "type", e.target.value)
+        }
+        label="Type"
+      >
+        <MenuItem value="Edm.String">Edm.String</MenuItem>
+        <MenuItem value="Collection(Edm.Single)">Collection(Edm.Single)</MenuItem>
+      </Select>
+    </FormControl>
                             <FormControlLabel
                               control={
                                 <Checkbox

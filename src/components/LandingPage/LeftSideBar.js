@@ -6,6 +6,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/ExitToApp";
 import { useLogout } from "../Logout/helper";
+import Swal from 'sweetalert2';
 import Image from "next/image";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import DeleteIconImage from "../../../public/images/delete.png";
@@ -143,6 +144,21 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
     }
   };
 
+  const handleDeleteConfirmation = (sessionId) => {
+    Swal.fire({
+      title: 'Delete chat?',
+      text: "Are you sure you want to delete this chat?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleDeleteChat(sessionId);
+      }
+    });
+  };
+
   return (
     <Box
       sx={{
@@ -215,13 +231,13 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
           <Image
             src={DeleteIconImage}
             alt="Delete Icon"
-            width={18}  // Adjust size as necessary
-            height={18}  // Adjust size as necessary
+            width={18} 
+            height={18}  
             style={{
               display: hoveredChat === chat.sessionId ? 'block' : 'none',
               cursor: 'pointer',
             }}
-            onClick={() => handleDeleteChat(chat.sessionId)}
+            onClick={() => handleDeleteConfirmation(chat.sessionId)}
           />
         </Box>
       ))}
