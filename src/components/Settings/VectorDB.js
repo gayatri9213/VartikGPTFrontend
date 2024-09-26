@@ -55,7 +55,8 @@ export default function VectorDB() {
     const fetchDepartments = async () => {
       try {
         const { data } = await axios.get(`${API_BASE_URL}/Department`);
-        setDepartments(data);
+        const filteredDepartments = data.filter(dept => dept.name !== "ADMIN");
+        setDepartments(filteredDepartments);
         console.log("Departments", data);
       } catch (error) {
         console.error("Failed to fetch departments:", error);

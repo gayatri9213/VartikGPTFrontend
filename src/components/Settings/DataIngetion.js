@@ -193,7 +193,8 @@ function DataIngetion() {
     const fetchDepartments = async () => {
       try {
         const { data } = await axios.get(`${API_BASE_URL}/Department`);
-        setDepartments(data);
+        const filteredDepartments = data.filter(dept => dept.name !== "ADMIN");
+        setDepartments(filteredDepartments);
         console.log("Departments", data);
       } catch (error) {
         console.error("Failed to fetch departments:", error);
@@ -386,7 +387,7 @@ function DataIngetion() {
             onChange={handleChange}
             label="Chunking Type"
           >
-            <MenuItem value="Recursive character">Recursive character</MenuItem>
+            <MenuItem value="Recursive">Recursive</MenuItem>
             <MenuItem value="Semantic">Semantic </MenuItem>
           </Select>
         </FormControl>
@@ -481,9 +482,7 @@ function StatusTable() {
           }
         );
         const data = dataIngestionResponse.data;
-        console.log(data.error);
-
-        data.sort((a, b) => b.departmentId - a.departmentId);
+        data.sort((a, b) => new Date(b.updatedDateTime) - new Date(a.updatedDateTime));
 
         // Extract department IDs
         const deptIds = Array.from(
@@ -586,6 +585,7 @@ function StatusTable() {
                 <TableCell>Vector Store</TableCell>
                 <TableCell>Vector Index</TableCell>
                 <TableCell>Chunking Type</TableCell>
+                <TableCell>Date</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
@@ -607,6 +607,7 @@ function StatusTable() {
                       <TableCell>{row.vectorStore}</TableCell>
                       <TableCell>{row.vectorIndex}</TableCell>
                       <TableCell>{row.chunkingType}</TableCell>
+                      <TableCell>{new Date(row.updatedDateTime).toISOString().slice(0, 10)}</TableCell>
                       <TableCell>
                         <LoadingButton
                           size="small"
@@ -623,11 +624,12 @@ function StatusTable() {
                             handleCheckStatus(row.status, row.error)
                           }
                         >
-                          Check Status
+                          Status
                         </LoadingButton>
                         <IconButton
                       color="error"
                       onClick={() => handleDeleteRecord(row.id)}
+                      sx={{position:"relative",top:"2px"}}
                     >
                       <DeleteIcon />
                     </IconButton>

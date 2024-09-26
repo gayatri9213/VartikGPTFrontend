@@ -224,7 +224,7 @@ export default function LeftSideBar({ setSelectedTab, setSelectedSessionId }) {
                 ? chat.message.substring(0, 15) + "..."
                 : "New Chat"
               : chat.message
-              ? chat.message.substring(0, 20) + "..."
+              ? chat.message.substring(0, 18) + "..."
               : "New Chat"}
           </Box>
 

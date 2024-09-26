@@ -392,7 +392,7 @@ export default function General({ onDepartmentNameChange }) {
             onChange={handleChange}
             label="Chunking Type"
           >
-            <MenuItem value="Recursive character">Recursive character</MenuItem>
+            <MenuItem value="Recursive">Recursive</MenuItem>
             <MenuItem value="Semantic">Semantic</MenuItem>
           </Select>
         </FormControl>
