@@ -100,6 +100,8 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
       { role: "User", message: newMessage },
     ]);
 
+    setMessage("");
+
     try {
       const userResponse = await axios.get(
         `${API_BASE_URL}/User/unique/${uniqueId}`
@@ -138,6 +140,8 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
         routingEnabled: routingEnabled,
       });
       console.log("a",a)
+
+
       // Create request body with fixed indexwise order
       const requestBody = {
         user_id: userId.toString(),
