@@ -642,7 +642,7 @@ function StatusTable() {
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[5, 10]}
           component="div"
           count={statusData.length}
           rowsPerPage={rowsPerPage}
