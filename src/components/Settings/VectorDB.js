@@ -113,6 +113,7 @@ export default function VectorDB() {
             },
           },
         };
+        console.log("Create pinecone External Payload :",externalPayload)
 
         if (selectedCapacity === "serverless") {
           externalPayload.fields.spec.region = vectorDBData.region;
@@ -583,16 +584,22 @@ export default function VectorDB() {
                           onChange={handleChange}
                         />
 
-                        <TextField
-                          name="metric"
-                          label="Metric"
-                          variant="outlined"
-                          fullWidth
-                          size="small"
-                          sx={{ mb: 2 }}
-                          value={vectorDBData.metric}
-                          onChange={handleChange}
-                        />
+                        <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                  <InputLabel id="metric-select-label">Metric</InputLabel>
+                  <Select
+                    labelId="metric-select-label"
+                    id="metric-select"
+                    name="metric"
+                    value={vectorDBData.metric}
+                    onChange={handleChange}
+                    label="Metric"
+                  >
+                    <MenuItem value="euclidean">Euclidean</MenuItem>
+                    <MenuItem value="cosine">Cosine</MenuItem>
+                    <MenuItem value="dotproduct">Dot Product</MenuItem>
+                  </Select>
+                </FormControl>
+                        
 
                         <TextField
                           name="timeout"
