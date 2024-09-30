@@ -261,7 +261,7 @@ export default function LoginForm() {
         Welcome to VartikGPT! 👋
       </Grid>
       <Grid variant="body2" align="center" sx={{ mb: 3 }}>
-        Please sign-in to your account and start the adventure
+        Please sign-in to your account and start exploring
       </Grid>
       <TextField fullWidth label="Email" margin="normal" />
       <TextField
