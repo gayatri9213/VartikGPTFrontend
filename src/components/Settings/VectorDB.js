@@ -158,13 +158,14 @@ export default function VectorDB() {
   const deletePineconeIndex = async () => {
     try {
       if (selectedVectorStore === "Pinecone") {
-        await axios.delete(
-          `${API_BASE_URL}/VectorStore/DeleteByVectorIndex/${vectorDBData.name}/${selectedVectorStore}`
-        );
-
         await axios.post(`${VectorDB_API_BASE_URL}/pinecone/delete`, {
           index_name: vectorDBData.name,
         });
+
+        await axios.delete(
+          `${API_BASE_URL}/VectorStore/DeleteByVectorIndex/${vectorDBData.name}/${selectedVectorStore}`
+        );
+        
         toast.success("Pinecone index deleted");
       }
     } catch (error) {
@@ -252,13 +253,13 @@ export default function VectorDB() {
   const deleteQdrantCollection = async () => {
     try {
       if (selectedVectorStore === "Qdrant") {
-        await axios.delete(
-          `${API_BASE_URL}/VectorStore/DeleteByVectorIndex/${vectorDBData.name}/${selectedVectorStore}`
-        );
-
         await axios.post(`${VectorDB_API_BASE_URL}/qdrant/deletecollection`, {
           collection_name: vectorDBData.name,
         });
+
+        await axios.delete(
+          `${API_BASE_URL}/VectorStore/DeleteByVectorIndex/${vectorDBData.name}/${selectedVectorStore}`
+        );     
 
         toast.success("Qdrant collection deleted");
       }
@@ -348,13 +349,13 @@ export default function VectorDB() {
   const deleteAzureindex = async () => {
     try {
       if (selectedVectorStore === "AzureOpenAI") {
-        await axios.delete(
-          `${API_BASE_URL}/VectorStore/DeleteByVectorIndex/${vectorDBData.name}/${selectedVectorStore}`
-        );
-
         await axios.post(`${VectorDB_API_BASE_URL}/azuresearch/delete`, {
           index_name: vectorDBData.name,
         });
+
+        await axios.delete(
+          `${API_BASE_URL}/VectorStore/DeleteByVectorIndex/${vectorDBData.name}/${selectedVectorStore}`
+        );        
 
         toast.success("Azure Index deleted");
       }
