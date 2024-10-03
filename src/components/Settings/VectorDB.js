@@ -79,28 +79,32 @@ export default function VectorDB() {
     }
   };
 
+
   const createPineconeIndex = async () => {
     try {
       if (selectedVectorStore === "Pinecone") {
+        let indexExists = false;
+
         try {
-          await axios.post(`${API_BASE_URL}/VectorStore`, {
-            VectorIndex: vectorDBData.name,
-            Type: selectedVectorStore,
-            DepartmentId: vectorDBData.departmentId,
-          });
-        } catch (err) {
-          if (err.response && err.response.status === 409) {
-            toast.error(
-              "A record with the same vector index for department already exists."
-            );
+          // Attempt to check if the Pinecone index exists
+          indexExists = await checkPineconeIndexExists(vectorDBData.name);
+        } catch (error) {
+          // Handle error when checking for the Pinecone index's existence
+          if (error.response && error.response.status === 500) {
+            console.error("Server error while checking Pinecone index existence:", error);
+            toast.error("A server error occurred while checking for Pinecone index existence.");
+            return; // Stop further execution
+          } else {
+            console.error("Error checking Pinecone index existence:", error);
+            throw error; // Re-throw if it's not specifically handled
           }
         }
-        const indexExists = await checkPineconeIndexExists(vectorDBData.name);
+  
         if (indexExists) {
           toast.info(`Pinecone index "${vectorDBData.name}" already exists.`);
           return;
         }
-
+  
         const externalPayload = {
           index_name: vectorDBData.name,
           fields: {
@@ -113,8 +117,7 @@ export default function VectorDB() {
             },
           },
         };
-        console.log("Create pinecone External Payload :",externalPayload)
-
+  
         if (selectedCapacity === "serverless") {
           externalPayload.fields.spec.region = vectorDBData.region;
         } else if (selectedCapacity === "pods") {
@@ -122,20 +125,36 @@ export default function VectorDB() {
           externalPayload.fields.spec.podType = vectorDBData.podType;
           externalPayload.fields.spec.pods = parseInt(vectorDBData.pods, 10);
         }
-        await axios.post(
-          `${VectorDB_API_BASE_URL}/pinecone/create`,
-          externalPayload
-        );
-        toast.success(
-          `Pinecone index "${vectorDBData.name}" created successfully.`
-        );
+  
+        try {
+          // First, create the Pinecone index
+          await axios.post(`${VectorDB_API_BASE_URL}/pinecone/create`, externalPayload);
+          toast.success(`Pinecone index "${vectorDBData.name}" created successfully.`);
+  
+          // Now, after the Pinecone index is created, create the VectorStore record
+          await axios.post(`${API_BASE_URL}/VectorStore`, {
+            VectorIndex: vectorDBData.name,
+            Type: selectedVectorStore,
+            DepartmentId: vectorDBData.departmentId,
+          });
+        } catch (err) {
+          // Handle error from creating the Pinecone index
+          toast.error(`Error creating Pinecone index "${vectorDBData.name}".`);
+          console.error("Error creating Pinecone index:", err);
+        }
       }
     } catch (error) {
-      toast.error(`Error creating Pinecone index "${vectorDBData.name}".`);
-      console.error("Error creating Pinecone index:", error);
+      if (error.response && error.response.status === 409) {
+        toast.error(
+          "A record with the same vector index for department already exists."
+        );
+      } else {
+        toast.error(`Error creating VectorStore record for "${vectorDBData.name}".`);
+        console.error("Error creating VectorStore record:", error);
+      }
     }
   };
-
+  
   const deletePineconeIndex = async () => {
     try {
       if (selectedVectorStore === "Pinecone") {
@@ -171,46 +190,64 @@ export default function VectorDB() {
   const createQdrantCollection = async () => {
     try {
       if (selectedVectorStore === "Qdrant") {
+        let collectionExists = false;
+
+      try {
+        // Attempt to check if the Qdrant collection exists
+        collectionExists = await checkQdrantCollectionExists(vectorDBData.name);
+      } catch (error) {
+        // Handle error when checking for the Qdrant collection's existence
+        if (error.response && error.response.status === 500) {
+          console.error("Server error while checking Qdrant collection existence:", error);
+          toast.error("A server error occurred while checking for Qdrant collection existence.");
+          return; // Stop further execution
+        } else {
+          console.error("Error checking Qdrant collection existence:", error);
+          throw error; // Re-throw if it's not specifically handled
+        }
+      }
+
+      if (collectionExists) {
+        toast.info(`Qdrant collection "${vectorDBData.name}" already exists.`);
+        return;
+      }
+  
         try {
+          // First, create the Qdrant collection
+          await axios.post(`${VectorDB_API_BASE_URL}/qdrant/create`, {
+            collection_name: vectorDBData.name,
+            fields: {
+              vector_size: parseInt(vectorDBData.size, 10),
+              vector_distance: vectorDBData.distance,
+            },
+          });
+  
+          toast.success(`Qdrant collection "${vectorDBData.name}" created successfully.`);
+  
+          // Now, after the Qdrant collection is created, create the VectorStore record
           await axios.post(`${API_BASE_URL}/VectorStore`, {
             VectorIndex: vectorDBData.name,
             Type: selectedVectorStore,
             DepartmentId: vectorDBData.departmentId,
           });
         } catch (err) {
-          if (err.response && err.response.status === 409) {
-            toast.error(
-              "A record with the same vector index for department already exists."
-            );
-          }
+          // Handle error from creating the Qdrant collection
+          toast.error(`Error creating Qdrant collection "${vectorDBData.name}".`);
+          console.error("Error creating Qdrant collection:", err);
         }
-        const collectionExists = await checkQdrantCollectionExists(
-          vectorDBData.name
-        );
-        if (collectionExists) {
-          toast.info(
-            `Qdrant collection "${vectorDBData.name}" already exists.`
-          );
-          return;
-        }
-
-        await axios.post(`${VectorDB_API_BASE_URL}/qdrant/create`, {
-          collection_name: vectorDBData.name,
-          fields: {
-            vector_size: parseInt(vectorDBData.size, 10),
-            vector_distance: vectorDBData.distance,
-          },
-        });
-
-        toast.success(
-          `Qdrant collection "${vectorDBData.name}" created successfully.`
-        );
       }
     } catch (error) {
-      toast.error(`Error creating Qdrant collection "${vectorDBData.name}".`);
-      console.error("Error creating Qdrant collection:", error);
+      if (error.response && error.response.status === 409) {
+        toast.error(
+          "A record with the same vector index for department already exists."
+        );
+      } else {
+        toast.error(`Error creating VectorStore record for "${vectorDBData.name}".`);
+        console.error("Error creating VectorStore record:", error);
+      }
     }
   };
+  
 
   const deleteQdrantCollection = async () => {
     try {
@@ -246,52 +283,67 @@ export default function VectorDB() {
 
   const createAzureIndex = async () => {
     try {
-      console.log(selectedVectorStore);
       if (selectedVectorStore === "AzureOpenAI") {
+        let indexExists = false;
+
+      try {
+        // Attempt to check if the Azure index exists
+        indexExists = await checkAzureIndexExists(vectorDBData.name);
+      } catch (error) {
+        if (error.response && error.response.status === 500) {
+          console.error("Server error while checking if the Azure index exists:", error);
+          toast.error("A server error occurred while checking for Azure index existence.");
+          return;
+        } else {
+          console.error("Error checking Azure index existence:", error);
+          throw error; 
+        }
+      }
+
+      if (indexExists) {
+        toast.info(`Azure index "${vectorDBData.name}" already exists.`);
+        return;
+      }
         try {
-          const res = await axios.post(`${API_BASE_URL}/VectorStore`, {
+          // First, create the Azure index
+          const res1 = await axios.post(`${VectorDB_API_BASE_URL}/azuresearch/create`, {
+            index_name: vectorDBData.name,
+            fields: fields.map((field) => ({
+              name: field.name,
+              type: field.type,
+              key: field.key,
+              index: field.index,
+              searchable: field.searchable,
+            })),
+          });
+          console.log("res1", res1);
+  
+          toast.success(`Azure index "${vectorDBData.name}" created successfully.`);
+  
+          // Now, after the Azure index is created, create the VectorStore record
+          await axios.post(`${API_BASE_URL}/VectorStore`, {
             VectorIndex: vectorDBData.name,
             Type: selectedVectorStore,
             DepartmentId: vectorDBData.departmentId,
           });
-          console.log("res",res)
         } catch (err) {
-          if (err.response && err.response.status === 409) {
-            console.error(
-              `A record with the same vector index "${vectorDBData.name}" for department already exists.`
-            );
-          }
+          // Handle error from creating the Azure index
+          toast.error(`Error creating Azure index "${vectorDBData.name}".`);
+          console.error("Error creating Azure index:", err);
         }
-
-        const indexExists = await checkAzureIndexExists(vectorDBData.name);
-        if (indexExists) {
-          toast.info(
-            `Azure index "${vectorDBData.name}" already exists in the external API.`
-          );
-          return;
-        }
-
-        const res1 = await axios.post(`${VectorDB_API_BASE_URL}/azuresearch/create`, {
-          index_name: vectorDBData.name,
-          fields: fields.map((field) => ({
-            name: field.name,
-            type: field.type,
-            key: field.key,
-            index: field.index,
-            searchable: field.searchable,
-          })),
-        });
-        console.log("res1",res1)
-
-        toast.success(
-          `Azure index "${vectorDBData.name}" created successfully.`
-        );
       }
     } catch (error) {
-      console.error("Error creating Azure index:", error);
-      toast.error(`Error creating Azure index "${vectorDBData.name}".`);
+      if (error.response && error.response.status === 409) {
+        console.error(
+          `A record with the same vector index "${vectorDBData.name}" for the department already exists.`
+        );
+      } else {
+        toast.error(`Error creating VectorStore record for "${vectorDBData.name}".`);
+        console.error("Error creating VectorStore record:", error);
+      }
     }
   };
+  
 
   const deleteAzureindex = async () => {
     try {
