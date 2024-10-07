@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, IconButton, InputAdornment, TextField, Typography } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
+import MicIcon from '@mui/icons-material/Mic'; // Import microphone icon from Material UI
 import axios from "axios";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -20,6 +21,7 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
   const [loading, setLoading] = useState(false);
   const [cachingEnabled, setCachingEnabled] = useState(null);
   const [routingEnabled, setRoutingEnabled] = useState(null);
+  const [isListening, setIsListening] = useState(false); // Track listening state
 
   useEffect(() => {
     const storedResponse = localStorage.getItem("azureAccount");
@@ -251,6 +253,43 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
     }
   };
 
+   // Speech Recognition
+const handleVoiceInput = () => {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    alert('Your browser does not support speech recognition.');
+    return;
+  }
+
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    setIsListening(true);
+  };
+
+  recognition.onend = () => {
+    setIsListening(false);
+  };
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+
+    // Append the transcribed message to the existing text in the TextField
+    setMessage((prevMessage) => prevMessage + " " + transcript); 
+  };
+
+  recognition.onerror = (event) => {
+    console.error('Speech recognition error:', event.error);
+  };
+
+  recognition.start(); // Start speech recognition
+};
+
+
+
   // Add handleKeyDown to handle Enter key press
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
@@ -348,12 +387,10 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
                   bgcolor: "#ffffff",
                   color: "black",
                   p: 1.5,
-                  //borderRadius: "15px 15px 15px 15px",
                   maxWidth: "70%",
                   wordWrap: "break-word",
                   overflowWrap: "break-word",
                   lineHeight: "1",
-                  //boxShadow: 1,
                 }}
               >
                 <Typography variant="body2">
@@ -389,6 +426,19 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
               fontWeight: "light",
             },
           }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={handleVoiceInput}
+                  color={isListening ? "primary" : "default"}
+                  aria-label="voice input"
+                >
+                  <MicIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
           fullWidth
           variant="outlined"
           value={message}
@@ -396,6 +446,16 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
           onKeyDown={handleKeyDown} 
           placeholder="Type your message here..."
         />
+
+           {/* Microphone Button */}
+        {/* <IconButton
+          onClick={handleVoiceInput}
+          color={isListening ? 'primary' : 'default'}
+          aria-label="voice input"
+        >
+          <MicIcon />
+        </IconButton> */}
+
         <LoadingButton
           type="submit"
           variant="contained"
