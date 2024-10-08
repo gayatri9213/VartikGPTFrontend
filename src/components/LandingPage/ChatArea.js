@@ -287,9 +287,6 @@ const handleVoiceInput = () => {
 
   recognition.start(); // Start speech recognition
 };
-
-
-
   // Add handleKeyDown to handle Enter key press
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
@@ -301,7 +298,7 @@ const handleVoiceInput = () => {
   // Function to format messages with newlines
   const formatMessage = (msg) => {
     return msg.split("\n").map((line, index) => (
-      <div key={index} style={{ marginTop: "7px" }}>
+      <div key={index} style={{ marginTop: "7px",position: "relative",top: "-12px"}}>
         {line}
       </div>
     ));
@@ -357,18 +354,19 @@ const handleVoiceInput = () => {
         }}
       >
         {messages.map((msg, index) => (
-          <Box key={index} sx={{ mb: 3 }}>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+          <Box key={index} sx={{ mb: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "flex-start", mb: 1 }}>
               <Box
                 sx={{
                   mr: 1,
-                  width: 35,
-                  height: 35,
+                  width: 30,
+                  height: 30,
                   display: "flex",
-                  alignItems: "flex-start",
+                  alignItems: "center",
                   justifyContent: "center",
                   borderRadius: "50%",
                   overflow: "hidden",
+                  flexShrink: 0,
                 }}
               >
                 <img
@@ -387,13 +385,13 @@ const handleVoiceInput = () => {
                   bgcolor: "#ffffff",
                   color: "black",
                   p: 1.5,
-                  maxWidth: "70%",
+                  maxWidth: "75%",
                   wordWrap: "break-word",
                   overflowWrap: "break-word",
                   lineHeight: "1",
                 }}
               >
-                <Typography variant="body2">
+                <Typography variant="body2"  sx={{ lineHeight: 1.4 }}>
                   {/* {msg.message} */}
 
                   {formatMessage(msg.message)}
