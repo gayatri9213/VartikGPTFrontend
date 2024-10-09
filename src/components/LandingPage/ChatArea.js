@@ -1,8 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { Box, IconButton, InputAdornment, TextField, Typography } from "@mui/material";
-import { LoadingButton } from "@mui/lab";
-import MicIcon from '@mui/icons-material/Mic'; // Import microphone icon from Material UI
 import axios from "axios";
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { LoadingButton } from "@mui/lab";
+import MicIcon from "@mui/icons-material/Mic";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import PauseIcon from "@mui/icons-material/Pause";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const API_CHAT_URL =
@@ -21,7 +29,9 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
   const [loading, setLoading] = useState(false);
   const [cachingEnabled, setCachingEnabled] = useState(null);
   const [routingEnabled, setRoutingEnabled] = useState(null);
-  const [isListening, setIsListening] = useState(false); // Track listening state
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null);
 
   useEffect(() => {
     const storedResponse = localStorage.getItem("azureAccount");
@@ -96,14 +106,11 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
 
     setLoading(true);
     const newMessage = message.trim();
-
     setMessages((prevMessages) => [
       ...prevMessages,
       { role: "User", message: newMessage },
     ]);
-
     setMessage("");
-
     try {
       const userResponse = await axios.get(
         `${API_BASE_URL}/User/unique/${uniqueId}`
@@ -111,8 +118,6 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
       const userId = userResponse.data.id;
       const localStorageData =
         JSON.parse(localStorage.getItem("formData")) || {};
-
-      // Check if a valid sessionId is available
       if (!selectedSessionId) {
         try {
           const userResponse = await axios.get(
@@ -131,8 +136,7 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
           console.error("Error updating session ID:", error);
         }
       }
-      // Save the message to the server
-      const a= await axios.post(`${API_BASE_URL}/ChatHistory`, {
+      await axios.post(`${API_BASE_URL}/ChatHistory`, {
         userId: userId,
         sessionId: selectedSessionId,
         role: "User",
@@ -141,10 +145,7 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
         cachingEnabled: cachingEnabled,
         routingEnabled: routingEnabled,
       });
-      console.log("a",a)
 
-
-      // Create request body with fixed indexwise order
       const requestBody = {
         user_id: userId.toString(),
         user_sessionid: selectedSessionId,
@@ -156,7 +157,6 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
         index_name: localStorageData.vectorIndex,
         llm_type: localStorageData.llmVendor,
         llm_model: localStorageData.llmModel,
-       // llm_deployment:localStorageData.llmModel,
         vartikgpt_temp: parseFloat(localStorageData.temp).toFixed(1),
         max_tokens: localStorageData.maxTokens,
         caching_enabled: cachingEnabled,
@@ -165,7 +165,6 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
       if (localStorageData.llmVendor === "AzureOpenAI") {
         requestBody.llm_deployment = localStorageData.llmModel;
       }
-      console.log("requestBody :", requestBody);
       const response = await fetch(`${API_CHAT_URL}`, {
         method: "POST",
         headers: {
@@ -174,27 +173,19 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
         },
         body: JSON.stringify(requestBody),
       });
-      console.log("response",response)
       if (response.ok) {
         if (
           response.headers.get("Content-Type")?.includes("application/json")
         ) {
           const jsonData = await response.json();
-          console.log("Parsed JSON Data:", jsonData);
-
           const json = JSON.parse(jsonData);
-          console.log("json", json);
-
           if (json && json.message) {
             const message = json.message;
-            console.log("Message:", message);
             const assistantResponse = message || `No data in indexes`;
-
             setMessages((prevMessages) => [
               ...prevMessages,
               { role: "assistant", message: assistantResponse },
             ]);
-
             await axios.post(`${API_BASE_URL}/ChatHistory`, {
               userId: userId,
               sessionId: selectedSessionId,
@@ -228,16 +219,16 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
           ...prevMessages,
           {
             role: "assistant",
-            message: `Server Error: ${response.statusText},Please contact Admin`,
+            message: `An error occurred: ${response.statusText}. Please contact the system administrator for assistance.`,
           },
         ]);
       } else {
         setMessages((prevMessages) => [
           ...prevMessages,
-          { role: "assistant", message: `Error: ${response.statusText}` },
+          { role: "assistant", message: `An error occurred: ${response.statusText}. Please contact the system administrator for assistance.` },
         ]);
       }
-      // If this is a new session, update the selectedSessionId
+
       if (!selectedSessionId) {
         setSelectedSessionId(data.session_id);
       }
@@ -245,49 +236,59 @@ export default function ChatArea({ selectedSessionId, setSelectedSessionId }) {
       console.error("Error fetching search results:", error);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { role: "assistant", message: `Error: ${error.message}` },
-      ]);
+        { role: "assistant", message: `An error occurred: Please contact the system administrator for assistance.` },
+      ]); 
     } finally {
       setLoading(false);
       setMessage("");
     }
   };
 
-   // Speech Recognition
-const handleVoiceInput = () => {
-  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-    alert('Your browser does not support speech recognition.');
-    return;
-  }
+  const handleVoiceInput = () => {
+    if (
+      !("webkitSpeechRecognition" in window || "SpeechRecognition" in window)
+    ) {
+      console.error("Your browser does not support speech recognition.");
+      return;
+    }
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
 
-  const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = new SpeechRecognition();
-  recognition.lang = 'en-US';
-  recognition.interimResults = false;
-
-  recognition.onstart = () => {
-    setIsListening(true);
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setMessage((prevMessage) => prevMessage + " " + transcript);
+    };
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+    };
+    recognition.start();
   };
 
-  recognition.onend = () => {
-    setIsListening(false);
+
+  const handleTextToSpeech = (message, index) => {
+    if (speakingMessageIndex === index) {
+      speechSynthesis.cancel();
+      setSpeakingMessageIndex(null);
+    } else {
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.onend = () => {
+        setSpeakingMessageIndex(null);
+      };
+      speechSynthesis.speak(utterance);
+      setSpeakingMessageIndex(index);
+    }
   };
 
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-
-    // Append the transcribed message to the existing text in the TextField
-    setMessage((prevMessage) => prevMessage + " " + transcript); 
-  };
-
-  recognition.onerror = (event) => {
-    console.error('Speech recognition error:', event.error);
-  };
-
-  recognition.start(); // Start speech recognition
-};
-  // Add handleKeyDown to handle Enter key press
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -295,10 +296,12 @@ const handleVoiceInput = () => {
     }
   };
 
-  // Function to format messages with newlines
   const formatMessage = (msg) => {
     return msg.split("\n").map((line, index) => (
-      <div key={index} style={{ marginTop: "7px",position: "relative",top: "-12px"}}>
+      <div
+        key={index}
+        style={{ marginTop: "7px", position: "relative", top: "-12px" }}
+      >
         {line}
       </div>
     ));
@@ -389,20 +392,37 @@ const handleVoiceInput = () => {
                   wordWrap: "break-word",
                   overflowWrap: "break-word",
                   lineHeight: "1",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
               >
-                <Typography variant="body2"  sx={{ lineHeight: 1.4 }}>
-                  {/* {msg.message} */}
-
+                <Typography
+                  variant="body2"
+                  sx={{ lineHeight: 1.4, flexGrow: 1 }}
+                >
                   {formatMessage(msg.message)}
                 </Typography>
+
+                {msg.role === "assistant" && (
+                  <IconButton
+                    onClick={() => handleTextToSpeech(msg.message, index)}
+                    aria-label={speakingMessageIndex === index ? "stop message" : "play message"}
+                    sx={{
+                      flexShrink: 0,
+                      alignSelf: "flex-start",
+                      mt: -1.75,
+                    }}
+                  >
+                   {speakingMessageIndex === index ? <PauseIcon /> : <VolumeUpIcon />}
+                  </IconButton>
+                )}
               </Box>
             </Box>
           </Box>
         ))}
       </Box>
 
-      {/* Input Field and Button (Sticky) */}
       <Box
         sx={{
           padding: 2,
@@ -441,18 +461,9 @@ const handleVoiceInput = () => {
           variant="outlined"
           value={message}
           onChange={handleMessageChange}
-          onKeyDown={handleKeyDown} 
+          onKeyDown={handleKeyDown}
           placeholder="Type your message here..."
         />
-
-           {/* Microphone Button */}
-        {/* <IconButton
-          onClick={handleVoiceInput}
-          color={isListening ? 'primary' : 'default'}
-          aria-label="voice input"
-        >
-          <MicIcon />
-        </IconButton> */}
 
         <LoadingButton
           type="submit"
